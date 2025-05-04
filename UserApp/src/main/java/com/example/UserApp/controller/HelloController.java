@@ -1,4 +1,4 @@
-package com.example.UserApp.controllers;
+package com.example.UserApp.controller;
 
 import org.springframework.web.bind.annotation.*;
 
