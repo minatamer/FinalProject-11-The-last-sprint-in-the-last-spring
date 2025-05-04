@@ -1,0 +1,14 @@
+package com.example.MessagesApp.models;
+
+import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+// Concrete message types implementing Factory pattern
+@Data
+@Document(collection = "messages")
+public class TextMessage extends Message {
+    @Override
+    public String getType() {
+        return "TEXT";
+    }
+}
