@@ -2,6 +2,8 @@ package com.example.UserApp.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +22,18 @@ public class User {
     private String gender;
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // 1. List of Friend IDs
+    @ElementCollection
+    private List<UUID> friendIds = new ArrayList<>();
+
+    // 2. List of My Post IDs
+    @ElementCollection
+    private List<UUID> myPostIds = new ArrayList<>();
+
+    // 3. List of Shared Post IDs
+    @ElementCollection
+    private List<UUID> sharedPostIds = new ArrayList<>();
+
     public User() {}
 
     public User(String username, String email, String password, String phoneNumber, int age, String gender) {
@@ -30,6 +44,8 @@ public class User {
         this.age = age;
         this.gender = gender;
     }
+
+    // Getters and setters...
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -55,6 +71,15 @@ public class User {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    public List<UUID> getFriendIds() { return friendIds; }
+    public void setFriendIds(List<UUID> friendIds) { this.friendIds = friendIds; }
+
+    public List<UUID> getMyPostIds() { return myPostIds; }
+    public void setMyPostIds(List<UUID> myPostIds) { this.myPostIds = myPostIds; }
+
+    public List<UUID> getSharedPostIds() { return sharedPostIds; }
+    public void setSharedPostIds(List<UUID> sharedPostIds) { this.sharedPostIds = sharedPostIds; }
+
     @Override
     public String toString() {
         return "User{" +
@@ -64,6 +89,10 @@ public class User {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", age=" + age +
                 ", gender='" + gender + '\'' +
+                ", friends=" + friendIds +
+                ", myPosts=" + myPostIds +
+                ", sharedPosts=" + sharedPostIds +
                 '}';
     }
 }
+
