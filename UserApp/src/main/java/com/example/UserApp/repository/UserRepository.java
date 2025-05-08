@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -32,6 +33,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     void deleteUser(@Param("userId") UUID userId);
 
     User findByEmail(String email);
+    Optional<User> findByToken(String token);
+
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 }

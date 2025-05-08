@@ -21,7 +21,9 @@ public class User {
     private int age;
     private String gender;
     private LocalDateTime createdAt = LocalDateTime.now();
-
+    private String token;
+    private boolean isTwoFactorEnabled = false;
+    private String otp;
     // 1. List of Friend IDs
     @ElementCollection
     private List<UUID> friendIds = new ArrayList<>();
@@ -33,6 +35,10 @@ public class User {
     // 3. List of Shared Post IDs
     @ElementCollection
     private List<UUID> sharedPostIds = new ArrayList<>();
+
+    // 4. List of blocked IDs
+    @ElementCollection
+    private List<UUID> blockedIds = new ArrayList<>();
 
     public User() {}
 
@@ -79,7 +85,25 @@ public class User {
 
     public List<UUID> getSharedPostIds() { return sharedPostIds; }
     public void setSharedPostIds(List<UUID> sharedPostIds) { this.sharedPostIds = sharedPostIds; }
+    public List<UUID> getBlockedIds() {
+        return blockedIds;
+    }
 
+    public void setBlockedIds(List<UUID> blockedIds) {
+        this.blockedIds = blockedIds;
+    }
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+    public boolean isTwoFactorEnabled() { return isTwoFactorEnabled; }
+    public void setTwoFactorEnabled(boolean isTwoFactorEnabled) { this.isTwoFactorEnabled = isTwoFactorEnabled; }
+
+    public String getOtp() { return otp; }
+    public void setOtp(String otp) { this.otp = otp; }
     @Override
     public String toString() {
         return "User{" +
