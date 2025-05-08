@@ -1,0 +1,19 @@
+
+spring:
+    application:
+        name: wallapp
+
+    data:
+        mongodb:
+            #            uri: mongodb://root:example@localhost:27017/wallapp
+            uri:  mongodb://root:example@localhost:27017/post?authSource=admin
+
+
+        rabbitmq:
+            host: rabbitmq
+            port: 5672
+            username: root
+            password: example
+
+server:
+    port: 8085
