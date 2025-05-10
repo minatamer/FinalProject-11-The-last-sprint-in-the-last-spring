@@ -26,11 +26,10 @@ public class PostService {
             throw new IllegalArgumentException("Post must contain either text or an image.");
         }
 
-        // Correct way to call the builder with Lombok
-        Post post = Post.builder()
-                .userId(postRequest.getUserId())   // Corrected field name
-                .textContent(postRequest.getTextContent())  // Corrected field name
-                .imageUrl(postRequest.getImageUrl())   // Corrected field name
+        Post post = new Post.PostBuilder()
+                .UserId(postRequest.getUserId())
+                .TextContent(postRequest.getTextContent())
+                .ImageUrl(postRequest.getImageUrl())
                 .build();
 
         return postRepository.save(post);
