@@ -3,6 +3,9 @@ package com.example.UserApp.service;
 import com.example.UserApp.model.User;
 import com.example.UserApp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -22,10 +25,12 @@ public class UserService {
     }
     @Autowired
     private MailService mailService;
+    @CachePut(value = "user_cache", key = "#result.id")
     public User saveUser(User user) {
         return userRepository.save(user);
     }
 
+    @Cacheable(value = "user_cache", key = "#id")
     public User findUserById(UUID id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
@@ -51,7 +56,7 @@ public class UserService {
             userRepository.save(user);
         }
     }
-
+    @CachePut(value = "user_cache", key = "#userId")
     public String updateUser(String username, String email, int age, String phoneNumber, String gender, UUID userId, boolean isTwoFactorEnabled) {
         try {
             // Fetch the current user from the database
@@ -93,7 +98,7 @@ public class UserService {
         }
     }
 
-
+    @CacheEvict(value = "user_cache", key = "#userId")
     public void deleteUser(UUID userId) {
         userRepository.deleteUser(userId);
     }
