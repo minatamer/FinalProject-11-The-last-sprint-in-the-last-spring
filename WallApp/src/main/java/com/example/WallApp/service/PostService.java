@@ -6,6 +6,7 @@ import com.example.WallApp.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,25 +26,45 @@ public class PostService {
             throw new IllegalArgumentException("Post must contain either text or an image.");
         }
 
-        Post post = Post.builder()
-                .userId(UUID.fromString(postRequest.getUserId()))
-                .textContent(postRequest.getTextContent())
-                .imageUrl(postRequest.getImageUrl())
+        Post post = new Post.PostBuilder()
+                .UserId(postRequest.getUserId())
+                .TextContent(postRequest.getTextContent())
+                .ImageUrl(postRequest.getImageUrl())
                 .build();
 
         return postRepository.save(post);
     }
 
-    public Optional<Post> getPostById(String id) {
+    public Optional<Post> getPostById(UUID id) {
         return postRepository.findById(id);
     }
 
-    public Post updatePost(Post post) {
-        return postRepository.save(post);
+    public Post updatePost(UUID id,PostRequest postreq) {
+        Optional<Post> optionalPost = postRepository.findById(id);
+        if (optionalPost.isPresent()) {
+            Post retrievedPost = optionalPost.get();
+
+            if ((postreq.getTextContent() == null || postreq.getTextContent().isBlank()) &&
+                    (postreq.getImageUrl() == null || postreq.getImageUrl().isBlank())
+                    ||(postreq.getTextContent() == null && retrievedPost.getTextContent() != null && postreq.getImageUrl() == null && retrievedPost.getImageUrl() == null)
+                    ||(postreq.getTextContent() == null && retrievedPost.getTextContent() == null && postreq.getImageUrl() == null && retrievedPost.getImageUrl() != null)) {
+                throw new IllegalArgumentException("Post cannot be empty. Please provide either text content or an image URL.");
+            }
+
+            retrievedPost.setTextContent(postreq.getTextContent());
+            retrievedPost.setImageUrl(postreq.getImageUrl());
+
+            // Save and return the updated post
+            return postRepository.save(retrievedPost);
+        }
+        return null;
     }
 
-    public void deletePost(Post post) {
-        postRepository.delete(post);
+    public void deletePostById(UUID id) {
+        postRepository.deleteById(id);
+    }
+    public void deleteAllPosts() {
+        postRepository.deleteAll();
     }
 
     public Optional<Post> likePost(Post post, String userId) {
@@ -52,6 +73,10 @@ public class PostService {
             return Optional.of(postRepository.save(post));
         }
         return Optional.of(post);
+    }
+
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
     }
 
 

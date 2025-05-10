@@ -1,0 +1,26 @@
+
+spring:
+    application:
+        name: wallapp
+
+    data:
+        mongodb:
+            #            uri: mongodb://root:example@localhost:27017/wallapp
+            uri:  mongodb://root:example@localhost:27017/post?authSource=admin
+        mongo-express:
+            image: mongo-express
+            ports:
+                - "9000:8081"  # You expose 8081 of container to 9000 of your host
+            environment:
+                - ME_CONFIG_MONGODB_SERVER=mongo
+            depends_on:
+                - mongo
+
+        rabbitmq:
+            host: rabbitmq
+            port: 5672
+            username: root
+            password: example
+
+server:
+    port: 8085
