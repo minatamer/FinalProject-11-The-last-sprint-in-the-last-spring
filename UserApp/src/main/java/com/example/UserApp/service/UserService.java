@@ -2,6 +2,7 @@ package com.example.UserApp.service;
 
 import com.example.UserApp.model.User;
 import com.example.UserApp.repository.UserRepository;
+import com.example.UserApp.security.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -138,6 +139,7 @@ public class UserService {
                     String token = UUID.randomUUID().toString();
                     user.setToken(token);
                     userRepository.save(user);
+                    TokenManager.getInstance().addToken(token);
                     return token;
                 }
             }
@@ -156,6 +158,7 @@ public class UserService {
                 String token = UUID.randomUUID().toString();
                 user.setToken(token);
                 userRepository.save(user);
+                TokenManager.getInstance().addToken(token);
                 return token;
             }
         }
@@ -176,12 +179,19 @@ public class UserService {
             user.setToken(null);
             userRepository.save(user);
         });
+        if (TokenManager.getInstance().isValidToken(token)) {
+            TokenManager.getInstance().removeToken(token);
+        }
         return true;
     }
-    public boolean isValidToken(String token) {
-        if (token == null || token.isEmpty()) return false;
-        return userRepository.findByToken(token).isPresent();
-    }
+//    public boolean isValidToken(String token) {
+//        if (token == null || token.isEmpty()) return false;
+//        return userRepository.findByToken(token).isPresent();
+//    }
+public boolean isValidToken(String token) {
+    return TokenManager.getInstance().isValidToken(token);
+}
+
 
 } 
 
