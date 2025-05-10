@@ -44,6 +44,67 @@ public class UserService {
         return userRepository.findAllUsers();
     }
 
+
+    public List<UUID> getMyPosts(UUID userID){
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isPresent()) {
+            return user.get().getMyPostIds();
+        }
+        return null;
+    }
+
+    public void setMyPosts(UUID userID, UUID myPostId) {
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isPresent()) {
+            List<UUID> myPostIds = user.get().getMyPostIds();
+            myPostIds.add(myPostId);
+            user.get().setMyPostIds(myPostIds);
+            userRepository.save(user.get());
+        }
+    }
+
+    public List<UUID> getSharedPosts(UUID userID){
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isPresent()) {
+            return user.get().getSharedPostIds();
+        }
+        return null;
+    }
+
+    public void setSharedPosts(UUID userID, UUID sharedPostId) {
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isPresent()) {
+            List<UUID> sharedPostIds = user.get().getSharedPostIds();
+            sharedPostIds.add(sharedPostId);
+            user.get().setSharedPostIds(sharedPostIds);
+            userRepository.save(user.get());
+        }
+    }
+
+    public List<UUID> getFriends(UUID userID){
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isPresent()) {
+            return user.get().getFriendIds();
+        }
+        return null;
+    }
+
+    public void setFriends(UUID userID, UUID friendId) {
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isPresent()) {
+            List<UUID> friendIds =user.get().getFriendIds();
+            if (!friendIds.contains(friendId)) {
+                friendIds.add(friendId);
+                user.get().setFriendIds(friendIds);
+                userRepository.save(user.get());
+            }
+        }
+    }
+
+    public boolean checkUserExistence(UUID userId){
+        return userRepository.existsById(userId);
+    }
+
     public void populateRandomUsers() {
         for (int i = 0; i < 10; i++) {
             User user = new User();
