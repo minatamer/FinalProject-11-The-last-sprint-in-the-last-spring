@@ -2,9 +2,15 @@ package com.example.UserApp.service;
 
 import com.example.UserApp.model.User;
 import com.example.UserApp.repository.UserRepository;
+import com.example.UserApp.security.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,11 +24,14 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
+    @Autowired
+    private MailService mailService;
+    @CachePut(value = "user_cache", key = "#result.id")
     public User saveUser(User user) {
         return userRepository.save(user);
     }
 
+    @Cacheable(value = "user_cache", key = "#id")
     public User findUserById(UUID id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
@@ -44,21 +53,145 @@ public class UserService {
             user.setPhoneNumber("0100000000" + i);
             user.setAge(20 + i);
             user.setGender(i % 2 == 0 ? "Male" : "Female");
+            user.setTwoFactorEnabled(false);
             userRepository.save(user);
         }
     }
-
-    public String updateUser(String username, String email, int age, String phoneNumber, String gender, UUID userId) {
+    @CachePut(value = "user_cache", key = "#userId")
+    public String updateUser(String username, String email, int age, String phoneNumber, String gender, UUID userId, boolean isTwoFactorEnabled) {
         try {
-            userRepository.updateUser(username, email, age, phoneNumber, gender, userId);
-            return "User updated";
+            // Fetch the current user from the database
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Only update fields that are provided (non-null)
+            if (username != null) {
+                user.setUsername(username);
+            }
+            if (email != null) {
+                user.setEmail(email);
+            }
+            if (age != 0) {
+                user.setAge(age);
+            }
+            if (phoneNumber != null) {
+                user.setPhoneNumber(phoneNumber);
+            }
+            if (gender != null) {
+                user.setGender(gender);
+            }
+            if (isTwoFactorEnabled != false) {
+                user.setTwoFactorEnabled(isTwoFactorEnabled);
+            }
+            // Save the updated user back to the database
+            userRepository.save(user);
+
+            // Send an update email notification
+            mailService.sendEmail(
+                    user.getEmail(),
+                    "Account Update Notification",
+                    "Hello " + user.getUsername() + ",\n\nYour account details were successfully updated on " + LocalDateTime.now() + ".\n\nIf this wasn't you, please contact support."
+            );
+
+            return "User updated successfully";
         } catch (Exception e) {
-            return "User not found";
+            return "Error: " + e.getMessage();
         }
     }
 
+    @CacheEvict(value = "user_cache", key = "#userId")
     public void deleteUser(UUID userId) {
         userRepository.deleteUser(userId);
     }
+    public void blockUser(UUID userId, UUID blockedUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getBlockedIds().contains(blockedUserId)) {
+            user.getBlockedIds().add(blockedUserId);
+        }
+        userRepository.save(user);
+    }
+    public List<UUID> getBlockedUsers(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getBlockedIds();
+    }
+
+    public String authenticate(String email, String password) {
+        Optional<User> userOpt = Optional.ofNullable(userRepository.findByEmail(email));
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Check if the password is correct
+            if (user.getPassword().equals(password)) {
+                // Check if 2FA is enabled
+                if (user.isTwoFactorEnabled()) {
+                    // Generate and send OTP if 2FA is enabled
+                    String otp = generateRandomOtp();
+                    user.setOtp(otp);
+                    userRepository.save(user); // Save OTP in the user record
+                    // Send OTP via email (Assuming you have a method to send the OTP)
+                    mailService.sendOtpEmail(user.getEmail(), otp);
+                    return "OTP sent to email. Please verify your OTP.";
+                } else {
+                    // If 2FA is not enabled, generate and return a token
+                    String token = UUID.randomUUID().toString();
+                    user.setToken(token);
+                    userRepository.save(user);
+                    TokenManager.getInstance().addToken(token);
+                    return token;
+                }
+            }
+        }
+        return null;
+    }
+
+    public String authenticateWithOtp(String email, String otp) {
+        Optional<User> userOpt = Optional.ofNullable(userRepository.findByEmail(email));
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Check if 2FA is enabled and if the OTP matches
+            if (user.isTwoFactorEnabled() && user.getOtp().equals(otp)) {
+                // OTP is correct, generate a token
+                String token = UUID.randomUUID().toString();
+                user.setToken(token);
+                userRepository.save(user);
+                TokenManager.getInstance().addToken(token);
+                return token;
+            }
+        }
+        return null;
+    }
+
+
+    private String generateRandomOtp() {
+        SecureRandom random = new SecureRandom();
+        int otp = 100000 + random.nextInt(900000); // Generates a 6-digit number
+        return String.valueOf(otp);
+    }
+
+
+    public boolean logout(String token) {
+        Optional<User> userOpt = userRepository.findByToken(token);
+        userOpt.ifPresent(user -> {
+            user.setToken(null);
+            userRepository.save(user);
+        });
+        if (TokenManager.getInstance().isValidToken(token)) {
+            TokenManager.getInstance().removeToken(token);
+        }
+        return true;
+    }
+//    public boolean isValidToken(String token) {
+//        if (token == null || token.isEmpty()) return false;
+//        return userRepository.findByToken(token).isPresent();
+//    }
+public boolean isValidToken(String token) {
+    return TokenManager.getInstance().isValidToken(token);
+}
+
+
 } 
 
