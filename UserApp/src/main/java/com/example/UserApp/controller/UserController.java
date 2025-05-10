@@ -130,6 +130,78 @@ public class UserController {
         return ResponseEntity.ok(userService.getBlockedUsers(userId));
     }
 
+//   START OF METHODS NEEDED IN WALL APP
+
+    @GetMapping("/{userId}/myposts")
+    public ResponseEntity<?> getMyPosts(@PathVariable UUID userId,
+                                        @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+        return ResponseEntity.ok(userService.getMyPosts(userId));
+    }
+
+    @PostMapping("/{userId}/myposts/{postId}")
+    public ResponseEntity<?> setMyPosts(@PathVariable UUID userId, @PathVariable UUID postId ,
+                                        @RequestHeader(value = "Authorization", required = false) String token){
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+            userService.setMyPosts(userId, postId);
+            return ResponseEntity.ok("Post"+ postId+" has been added to the user." + userId);
+    }
+
+    @GetMapping("{userId}/sharedposts")
+    public ResponseEntity<?> getSharedPosts(@PathVariable UUID userId,
+                                            @RequestHeader(value = "Authorization",required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+        return ResponseEntity.ok(userService.getSharedPosts(userId));
+    }
+
+    @PostMapping("{userId}/sharedposts/{postId}")
+    public ResponseEntity<?> setSharedPosts(@PathVariable UUID userId, @PathVariable UUID postId ,
+                                            @RequestHeader(value = "Authorization",required = false) String token){
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+
+        }
+        userService.setSharedPosts(userId, postId);
+        Map<String, String> body = Map.of(
+                "message", "post " + postId + " has been added to the shared posts of user " + userId
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("{userId}/friends")
+    public ResponseEntity<?> getFriends(@PathVariable UUID userId,@RequestHeader(value = "Authorization",required = false) String token){
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+        return ResponseEntity.ok(userService.getFriends(userId));
+    }
+
+    @PostMapping("{userId}/friends/{friendId}")
+    public ResponseEntity<?> setFriends(@PathVariable UUID userId,@PathVariable UUID friendId, @RequestHeader(value = "Authorization",required = false) String token){
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+        userService.setFriends(userId, friendId);
+        Map<String, String> body = Map.of(
+                "message", "friend " + friendId + " has been added to the friends lis of the user " + userId
+        );
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("check/{userId}")
+    public boolean checkUser(@PathVariable UUID userId){
+        return userService.checkUserExistence(userId);
+    }
+
+//    END OF METHODS NEEDED FOR WALLAPP
+
+
 //    @PostMapping("/login")
 //    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
 //        String email = credentials.get("email");

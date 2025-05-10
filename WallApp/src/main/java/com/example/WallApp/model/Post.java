@@ -22,7 +22,7 @@ public class Post {
     private String textContent;    // For text content
     private String imageUrl;       // For image content (could be a URL or base64 string)
 
-    private List<String> likedBy ;
+    private List<UUID> likedBy ;
     private LocalDateTime createdAt ;
 
     //    public Post(){}
@@ -59,11 +59,11 @@ public class Post {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getLikedBy() {
+    public List<UUID> getLikedBy() {
         return likedBy;
     }
 
-    public void setLikedBy(List<String> likedBy) {
+    public void setLikedBy(List<UUID> likedBy) {
         this.likedBy = likedBy;
     }
 

@@ -1,9 +1,12 @@
 package com.example.WallApp.service;
 
+import com.example.WallApp.Clients.UserClient;
 import com.example.WallApp.dto.PostRequest;
 import com.example.WallApp.model.Post;
 import com.example.WallApp.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,23 +19,31 @@ public class PostService {
     PostRepository postRepository;
 
     @Autowired
+    UserClient userClient;
+
+    @Autowired
     public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
 
     public Post addPost(PostRequest postRequest) {
+        // Validate the post content
         if ((postRequest.getTextContent() == null || postRequest.getTextContent().isBlank()) &&
                 (postRequest.getImageUrl() == null || postRequest.getImageUrl().isBlank())) {
             throw new IllegalArgumentException("Post must contain either text or an image.");
         }
 
+        // Create and save the post
         Post post = new Post.PostBuilder()
                 .UserId(postRequest.getUserId())
                 .TextContent(postRequest.getTextContent())
                 .ImageUrl(postRequest.getImageUrl())
                 .build();
 
-        return postRepository.save(post);
+        // Add post to the user's list of posts via UserClient
+        userClient.addPost(postRequest.getUserId(), post.getId());
+        postRepository.save(post);
+        return post ;
     }
 
     public Optional<Post> getPostById(UUID id) {
@@ -67,7 +78,7 @@ public class PostService {
         postRepository.deleteAll();
     }
 
-    public Optional<Post> likePost(Post post, String userId) {
+    public Optional<Post> likePost(Post post, UUID userId) {
         if (!post.getLikedBy().contains(userId)) {
             post.getLikedBy().add(userId);
             return Optional.of(postRepository.save(post));
@@ -81,13 +92,17 @@ public class PostService {
 
 
     //ME7TAGEEN NE LINK BEL USER MESH EL POST
-//    public Optional<Post> sharePost(Post post, String userId) {
-//        if (!post.getSharedBy().contains(userId)) {
-//            post.getSharedBy().add(userId);
-//            return Optional.of(postRepository.save(post));
-//        }
-//        return Optional.of(post);
-//    }
+
+
+    public ResponseEntity<?> addFriend(UUID userId, UUID friendId) {
+        return userClient.addFriend(userId, friendId);
+    }
+
+    public ResponseEntity<?> sharePost(UUID userId, UUID postId) {
+        return userClient.setSharedPost(userId, postId);
+    }
+
+
 
     //  ME7TAGEEN KAMAN NE3MEL FUNCTION FEL SERVICE ESMAHA ADD FRIEND
 

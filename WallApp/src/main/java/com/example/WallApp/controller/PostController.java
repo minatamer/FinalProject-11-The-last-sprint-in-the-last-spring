@@ -4,6 +4,7 @@ import com.example.WallApp.dto.PostRequest;
 import com.example.WallApp.model.Post;
 import com.example.WallApp.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,8 +24,8 @@ public class PostController {
     }
 
     @PostMapping
-    public Post createPost(@RequestBody PostRequest postRequest) {
-        return postService.addPost(postRequest);
+    public ResponseEntity<?> createPost(@RequestBody PostRequest postRequest) {
+        return ResponseEntity.ok(postService.addPost(postRequest));
     }
 
     @GetMapping("/all")
@@ -54,16 +55,19 @@ public class PostController {
         postService.deleteAllPosts();
     }
 
-    @PutMapping("/{id}/like")
-    public Optional<Post> likePost(@PathVariable UUID id, @RequestParam String userId) {
+    @PutMapping("/{userId}/like/{id}")
+    public Optional<Post> likePost(@PathVariable UUID id, @PathVariable UUID userId) {
         Optional<Post> postOpt = postService.getPostById(id);
         return postOpt.flatMap(post -> postService.likePost(post, userId));
     }
 
-//    @PutMapping("/{id}/share")
-//    public Optional<Post> sharePost(@PathVariable String id, @RequestParam String userId) {
-//        Optional<Post> postOpt = postService.getPostById(id);
-//        return postOpt.flatMap(post -> postService.sharePost(post, userId));
-//    }
+    @PostMapping("/{userId}/sharedposts/{id}")
+    public ResponseEntity<?> sharePost(@PathVariable UUID userId,@PathVariable UUID id) {
+        return postService.sharePost(userId,id);
+    }
+    @PostMapping("/{userId}/friends/{friendId}")
+    public ResponseEntity<?> addFriend(@PathVariable UUID userId,@PathVariable UUID friendId) {
+        return postService.addFriend(userId,friendId);
+    }
 }
 
