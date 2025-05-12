@@ -23,6 +23,7 @@ public class Post {
     private String imageUrl;       // For image content (could be a URL or base64 string)
 
     private List<UUID> likedBy ;
+    private List<UUID> sharedBy ;
     private LocalDateTime createdAt ;
 
     //    public Post(){}
@@ -32,6 +33,7 @@ public class Post {
         this.textContent = builder.textContent;
         this.imageUrl = builder.imageUrl;
         this.likedBy = new ArrayList<>();
+        this.sharedBy = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
     }
 
@@ -63,8 +65,15 @@ public class Post {
         return likedBy;
     }
 
+    public List<UUID> getSharedBy() {
+        return sharedBy;
+    }
+
     public void setLikedBy(List<UUID> likedBy) {
         this.likedBy = likedBy;
+    }
+    public void setSharedBy(List<UUID> sharedBy) {
+        this.sharedBy = sharedBy;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -80,8 +89,12 @@ public class Post {
         private UUID userId;
         private String textContent;
         private String imageUrl;
-        private List<String> likedBy = new ArrayList<>();
+        private List<UUID> likedBy = new ArrayList<>();
+        private List<UUID> sharedBy = new ArrayList<>();
         private LocalDateTime createdAt = LocalDateTime.now();
+
+
+
 
         public PostBuilder Id(UUID id) {
             this.id = id;
@@ -103,10 +116,11 @@ public class Post {
             return this;
         }
 
-        public PostBuilder LikedBy(List<String> likedBy) {
+        public PostBuilder LikedBy(List<UUID> likedBy) {
             this.likedBy = likedBy;
             return this;
         }
+
 
         public PostBuilder CreatedAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
@@ -117,7 +131,5 @@ public class Post {
         public Post build() {
             return new Post(this);
         }
-    }
 }
-
-
+}

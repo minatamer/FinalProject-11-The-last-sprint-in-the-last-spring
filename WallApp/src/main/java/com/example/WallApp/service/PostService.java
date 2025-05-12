@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,6 @@ public class PostService {
                 .ImageUrl(postRequest.getImageUrl())
                 .build();
 
-        // Add post to the user's list of posts via UserClient
-        userClient.addPost(postRequest.getUserId(), post.getId());
         postRepository.save(post);
         return post ;
     }
@@ -130,12 +129,35 @@ public class PostService {
         return ResponseEntity.ok(body);
     }
 
-    public ResponseEntity<?> sharePost(UUID userId, UUID postId) {
-        return userClient.setSharedPost(userId, postId);
+    public ResponseEntity<?> removeFriend(UUID userId, UUID friendId) {
+        return userClient.removeFriend(userId, friendId);
     }
 
+    public ResponseEntity<?> sharePost(UUID userId, UUID postId) {
+        if(!postRepository.existsById(postId)) {
+            throw new IllegalArgumentException("Post with id " + postId + " does not exist.");
+        }
+        if(!Boolean.TRUE.equals(userClient.checkUser(userId).getBody())){
+            throw new IllegalArgumentException("User with id " + userId + " does not exist.");
+        }
+        Post post = postRepository.findById(postId).get();
+        if(!post.getSharedBy().contains(userId)) {
+            List<UUID> peopleWhoShared = post.getSharedBy();
+            peopleWhoShared.add(userId);
+            post.setSharedBy(peopleWhoShared);
+            postRepository.save(post);
+            Map<String,String> body = Map.of(
+                    "message","Post "+postId+ " has been shared by "+userId
+            );
+            return ResponseEntity.ok(body);
+
+
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId){return userClient.getFriends(userId);}
 
 
 
 }
-
