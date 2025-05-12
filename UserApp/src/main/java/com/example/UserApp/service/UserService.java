@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -187,7 +189,7 @@ public class UserService {
         }
         return true;
     }
-//    public boolean isValidToken(String token) {
+    //    public boolean isValidToken(String token) {
 //        if (token == null || token.isEmpty()) return false;
 //        return userRepository.findByToken(token).isPresent();
 //    }
@@ -226,7 +228,7 @@ public class UserService {
     //Friend functions
 
     @Transactional
-    public void addFriend(UUID userId, UUID friendId) {
+    public ResponseEntity<?> addFriend(UUID userId, UUID friendId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
         User friend = userRepository.findById(friendId)
@@ -236,17 +238,26 @@ public class UserService {
             Friend newFriend = new Friend(null, user, friend);
             friendRepository.save(newFriend);
         }
+        Map<String,String> body = Map.of(
+                "message",friendId+" has been added to the followed users of "+ userId
+        );
+        return  ResponseEntity.ok().body(body);
     }
 
     @Transactional
-    public void removeFriend(UUID userId, UUID friendId) {
+    public ResponseEntity<?> removeFriend(UUID userId, UUID friendId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
 
         friendRepository.deleteByUserAndFriend(user, friend);
+        Map<String,String> body = Map.of(
+                "message",friendId+" has been removed from the followed users of "+ userId
+        );
+        return  ResponseEntity.ok().body(body);
     }
+
 
     public List<UUID> getFriends(UUID userId) {
         User user = userRepository.findById(userId)
@@ -256,9 +267,8 @@ public class UserService {
                 .stream()
                 .map(f -> f.getFriend().getId())
                 .toList();
-    }
+}
 
 
 
 }
-

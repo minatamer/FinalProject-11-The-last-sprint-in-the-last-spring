@@ -4,35 +4,24 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "user-service", url = "http://localhost:8080/user")
 public interface UserClient {
 
-//    MY POSTS
- @GetMapping("/{userId}/myposts")
-    public ResponseEntity<?> getMyPosts(@PathVariable("userId") UUID userId);
-
- @PostMapping(value="{userId}/myposts/{postId}", produces = "application/json")
-    public ResponseEntity<String> addPost(@PathVariable("userId") UUID userId, @PathVariable("postId") UUID postId);
-
-//  SHARED POSTS
-
- @GetMapping("{userId}/sharedposts")
-    public ResponseEntity<?> getSharedPosts(@PathVariable("userId") UUID userId);
-
- @PostMapping("{userId}/sharedposts/{postId}")
-    public ResponseEntity<?> setSharedPost(@PathVariable("userId") UUID userId, @PathVariable("postId") UUID postId);
-
 
 //  FRIENDS
 
- @GetMapping("{userId}/friends")
-    public ResponseEntity<?> getFriends(@PathVariable("userId") UUID userId);
+    @GetMapping("{userId}/friends")
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable("userId") UUID userId);
 
- @PostMapping("{userId}/friends/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable("userId") UUID userId, @PathVariable("friendId") UUID friendId);
+    @PostMapping("{userId}/friend/{friendId}")
+    public ResponseEntity<String> addFriend(@PathVariable("userId") UUID userId, @PathVariable("friendId") UUID friendId);
 
- @GetMapping("check/{userId}")
- ResponseEntity<Boolean> checkUser(@PathVariable("userId") UUID userId);
+    @DeleteMapping("{userId}/unfriend/{friendId}")
+    public ResponseEntity<String> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId);
+
+    @GetMapping("check/{userId}")
+    ResponseEntity<Boolean> checkUser(@PathVariable("userId")UUID userId);
 }

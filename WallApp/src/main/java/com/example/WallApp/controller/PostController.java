@@ -65,9 +65,18 @@ public class PostController {
     public ResponseEntity<?> sharePost(@PathVariable UUID userId,@PathVariable UUID id) {
         return postService.sharePost(userId,id);
     }
-    @PostMapping("/{userId}/friends/{friendId}")
+    @PostMapping("/{userId}/friend/{friendId}")
     public ResponseEntity<?> addFriend(@PathVariable UUID userId,@PathVariable UUID friendId) {
         return postService.addFriend(userId,friendId);
     }
-}
 
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId){
+        return postService.getFriends(userId);
+    }
+
+    @DeleteMapping("/{userId}/unfriend/{friendId}")
+    public ResponseEntity<?> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId){
+        return postService.removeFriend(userId,friendId);
+}
+}

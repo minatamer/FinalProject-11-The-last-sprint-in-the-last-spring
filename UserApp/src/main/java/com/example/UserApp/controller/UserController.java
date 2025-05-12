@@ -210,13 +210,13 @@ public class UserController {
 
     //Friend APIs
     @PostMapping("/{userId}/friend/{friendId}")
-    public ResponseEntity<String> addFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
-        userService.addFriend(userId, friendId);
-        return ResponseEntity.ok("Friend added.");
+    public ResponseEntity<?> addFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
+
+        return ResponseEntity.ok(userService.addFriend(userId, friendId));
     }
 
     @DeleteMapping("/{userId}/unfriend/{friendId}")
-    public ResponseEntity<String> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
+    public ResponseEntity<?> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
         userService.removeFriend(userId, friendId);
         return ResponseEntity.ok("Friend removed.");
     }
@@ -224,7 +224,7 @@ public class UserController {
     @GetMapping("/{userId}/friends")
     public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId) {
         return ResponseEntity.ok(userService.getFriends(userId));
-    }
+}
 
 
 }
