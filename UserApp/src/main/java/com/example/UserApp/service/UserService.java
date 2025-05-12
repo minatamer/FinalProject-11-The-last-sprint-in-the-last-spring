@@ -1,8 +1,13 @@
 package com.example.UserApp.service;
 
+import com.example.UserApp.model.BlockedUser;
+import com.example.UserApp.model.Friend;
 import com.example.UserApp.model.User;
+import com.example.UserApp.repository.BlockedUserRepository;
+import com.example.UserApp.repository.FriendRepository;
 import com.example.UserApp.repository.UserRepository;
 import com.example.UserApp.security.TokenManager;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -18,7 +23,14 @@ import java.util.UUID;
 @Service
 public class UserService {
 
+    @Autowired
+    private BlockedUserRepository blockedUserRepository;
+
+    @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private FriendRepository friendRepository;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -44,62 +56,6 @@ public class UserService {
         return userRepository.findAllUsers();
     }
 
-
-    public List<UUID> getMyPosts(UUID userID){
-        Optional<User> user = userRepository.findById(userID);
-        if (user.isPresent()) {
-            return user.get().getMyPostIds();
-        }
-        return null;
-    }
-
-    public void setMyPosts(UUID userID, UUID myPostId) {
-        Optional<User> user = userRepository.findById(userID);
-        if (user.isPresent()) {
-            List<UUID> myPostIds = user.get().getMyPostIds();
-            myPostIds.add(myPostId);
-            user.get().setMyPostIds(myPostIds);
-            userRepository.save(user.get());
-        }
-    }
-
-    public List<UUID> getSharedPosts(UUID userID){
-        Optional<User> user = userRepository.findById(userID);
-        if (user.isPresent()) {
-            return user.get().getSharedPostIds();
-        }
-        return null;
-    }
-
-    public void setSharedPosts(UUID userID, UUID sharedPostId) {
-        Optional<User> user = userRepository.findById(userID);
-        if (user.isPresent()) {
-            List<UUID> sharedPostIds = user.get().getSharedPostIds();
-            sharedPostIds.add(sharedPostId);
-            user.get().setSharedPostIds(sharedPostIds);
-            userRepository.save(user.get());
-        }
-    }
-
-    public List<UUID> getFriends(UUID userID){
-        Optional<User> user = userRepository.findById(userID);
-        if (user.isPresent()) {
-            return user.get().getFriendIds();
-        }
-        return null;
-    }
-
-    public void setFriends(UUID userID, UUID friendId) {
-        Optional<User> user = userRepository.findById(userID);
-        if (user.isPresent()) {
-            List<UUID> friendIds =user.get().getFriendIds();
-            if (!friendIds.contains(friendId)) {
-                friendIds.add(friendId);
-                user.get().setFriendIds(friendIds);
-                userRepository.save(user.get());
-            }
-        }
-    }
 
     public boolean checkUserExistence(UUID userId){
         return userRepository.existsById(userId);
@@ -163,20 +119,6 @@ public class UserService {
     @CacheEvict(value = "user_cache", key = "#userId")
     public void deleteUser(UUID userId) {
         userRepository.deleteUser(userId);
-    }
-    public void blockUser(UUID userId, UUID blockedUserId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!user.getBlockedIds().contains(blockedUserId)) {
-            user.getBlockedIds().add(blockedUserId);
-        }
-        userRepository.save(user);
-    }
-    public List<UUID> getBlockedUsers(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getBlockedIds();
     }
 
     public String authenticate(String email, String password) {
@@ -249,10 +191,74 @@ public class UserService {
 //        if (token == null || token.isEmpty()) return false;
 //        return userRepository.findByToken(token).isPresent();
 //    }
-public boolean isValidToken(String token) {
-    return TokenManager.getInstance().isValidToken(token);
+    public boolean isValidToken(String token) {
+        return TokenManager.getInstance().isValidToken(token);
+    }
+
+    //Blocking User functions
+    @Transactional
+    public void blockUser(UUID userId, UUID targetId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        if (blockedUserRepository.findByUserAndBlockedUser(user, target).isEmpty()) {
+            blockedUserRepository.save(new BlockedUser(user, target));
+        }
+    }
+
+    @Transactional
+    public void unblockUser(UUID userId, UUID targetId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        blockedUserRepository.deleteByUserAndBlockedUser(user, target);
+    }
+
+    public List<UUID> getBlockedUserIds(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        return blockedUserRepository.findByUser(user)
+                .stream()
+                .map(blocked -> blocked.getBlockedUser().getId())
+                .toList();
+    }
+
+    //Friend functions
+
+    @Transactional
+    public void addFriend(UUID userId, UUID friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
+
+        if (!friendRepository.existsByUserAndFriend(user, friend)) {
+            Friend newFriend = new Friend(null, user, friend);
+            friendRepository.save(newFriend);
+        }
+    }
+
+    @Transactional
+    public void removeFriend(UUID userId, UUID friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
+
+        friendRepository.deleteByUserAndFriend(user, friend);
+    }
+
+    public List<UUID> getFriends(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        return friendRepository.findAllByUser(user)
+                .stream()
+                .map(f -> f.getFriend().getId())
+                .toList();
+    }
+
+
+
 }
-
-
-} 
 
