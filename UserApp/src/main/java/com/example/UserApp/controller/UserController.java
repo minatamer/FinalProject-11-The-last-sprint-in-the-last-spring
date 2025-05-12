@@ -208,4 +208,23 @@ public class UserController {
         return ResponseEntity.ok(blockedUserIds);
     }
 
+    //Friend APIs
+    @PostMapping("/{userId}/friend/{friendId}")
+    public ResponseEntity<String> addFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
+        userService.addFriend(userId, friendId);
+        return ResponseEntity.ok("Friend added.");
+    }
+
+    @DeleteMapping("/{userId}/unfriend/{friendId}")
+    public ResponseEntity<String> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
+        userService.removeFriend(userId, friendId);
+        return ResponseEntity.ok("Friend removed.");
+    }
+
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId) {
+        return ResponseEntity.ok(userService.getFriends(userId));
+    }
+
+
 }
