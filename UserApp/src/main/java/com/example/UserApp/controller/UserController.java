@@ -108,91 +108,8 @@ public class UserController {
         return ResponseEntity.ok("User deleted.");
     }
 
-    @PostMapping("/{userId}/block/{blockedUserId}")
-    public ResponseEntity<?> blockUser(@PathVariable UUID userId,
-                                       @PathVariable UUID blockedUserId,
-                                       @RequestHeader(value = "Authorization", required = false) String token) {
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-
-        userService.blockUser(userId, blockedUserId);
-        return ResponseEntity.ok("User " + blockedUserId + " has been blocked by " + userId);
-    }
-
-    @GetMapping("/{userId}/blocked")
-    public ResponseEntity<?> getBlockedUsers(@PathVariable UUID userId,
-                                             @RequestHeader(value = "Authorization", required = false) String token) {
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-
-        return ResponseEntity.ok(userService.getBlockedUsers(userId));
-    }
 
 //   START OF METHODS NEEDED IN WALL APP
-
-    @GetMapping("/{userId}/myposts")
-    public ResponseEntity<?> getMyPosts(@PathVariable UUID userId,
-                                        @RequestHeader(value = "Authorization", required = false) String token) {
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-        return ResponseEntity.ok(userService.getMyPosts(userId));
-    }
-
-    @PostMapping("/{userId}/myposts/{postId}")
-    public ResponseEntity<?> setMyPosts(@PathVariable UUID userId, @PathVariable UUID postId ,
-                                        @RequestHeader(value = "Authorization", required = false) String token){
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-            userService.setMyPosts(userId, postId);
-            return ResponseEntity.ok("Post"+ postId+" has been added to the user." + userId);
-    }
-
-    @GetMapping("{userId}/sharedposts")
-    public ResponseEntity<?> getSharedPosts(@PathVariable UUID userId,
-                                            @RequestHeader(value = "Authorization",required = false) String token) {
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-        return ResponseEntity.ok(userService.getSharedPosts(userId));
-    }
-
-    @PostMapping("{userId}/sharedposts/{postId}")
-    public ResponseEntity<?> setSharedPosts(@PathVariable UUID userId, @PathVariable UUID postId ,
-                                            @RequestHeader(value = "Authorization",required = false) String token){
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-
-        }
-        userService.setSharedPosts(userId, postId);
-        Map<String, String> body = Map.of(
-                "message", "post " + postId + " has been added to the shared posts of user " + userId
-        );
-        return ResponseEntity.ok(body);
-    }
-
-    @GetMapping("{userId}/friends")
-    public ResponseEntity<?> getFriends(@PathVariable UUID userId,@RequestHeader(value = "Authorization",required = false) String token){
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-        return ResponseEntity.ok(userService.getFriends(userId));
-    }
-
-    @PostMapping("{userId}/friends/{friendId}")
-    public ResponseEntity<?> setFriends(@PathVariable UUID userId,@PathVariable UUID friendId, @RequestHeader(value = "Authorization",required = false) String token){
-        if (!isAuthenticated(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
-        userService.setFriends(userId, friendId);
-        Map<String, String> body = Map.of(
-                "message", "friend " + friendId + " has been added to the friends lis of the user " + userId
-        );
-        return ResponseEntity.ok(body);
-    }
 
     @GetMapping("check/{userId}")
     public boolean checkUser(@PathVariable UUID userId){
@@ -270,6 +187,25 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token.");
         }
+    }
+
+    //Blocking User APIs
+    @PostMapping("/{userId}/block/{targetId}")
+    public ResponseEntity<String> blockUser(@PathVariable UUID userId, @PathVariable UUID targetId) {
+        userService.blockUser(userId, targetId);
+        return ResponseEntity.ok("User blocked successfully.");
+    }
+
+    @DeleteMapping("/{userId}/unblock/{targetId}")
+    public ResponseEntity<String> unblockUser(@PathVariable UUID userId, @PathVariable UUID targetId) {
+        userService.unblockUser(userId, targetId);
+        return ResponseEntity.ok("User unblocked successfully.");
+    }
+
+    @GetMapping("/{userId}/blocked-users")
+    public ResponseEntity<List<UUID>> getBlockedUserIds(@PathVariable UUID userId) {
+        List<UUID> blockedUserIds = userService.getBlockedUserIds(userId);
+        return ResponseEntity.ok(blockedUserIds);
     }
 
 }
