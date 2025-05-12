@@ -1,8 +1,10 @@
 package com.example.UserApp.service;
 
 import com.example.UserApp.model.BlockedUser;
+import com.example.UserApp.model.Friend;
 import com.example.UserApp.model.User;
 import com.example.UserApp.repository.BlockedUserRepository;
+import com.example.UserApp.repository.FriendRepository;
 import com.example.UserApp.repository.UserRepository;
 import com.example.UserApp.security.TokenManager;
 import jakarta.transaction.Transactional;
@@ -26,6 +28,9 @@ public class UserService {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private FriendRepository friendRepository;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -191,6 +196,7 @@ public class UserService {
     }
 
     //Blocking User functions
+    @Transactional
     public void blockUser(UUID userId, UUID targetId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         User target = userRepository.findById(targetId).orElseThrow(() -> new RuntimeException("Target user not found"));
@@ -217,6 +223,42 @@ public class UserService {
                 .toList();
     }
 
+    //Friend functions
 
-} 
+    @Transactional
+    public void addFriend(UUID userId, UUID friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
+
+        if (!friendRepository.existsByUserAndFriend(user, friend)) {
+            Friend newFriend = new Friend(null, user, friend);
+            friendRepository.save(newFriend);
+        }
+    }
+
+    @Transactional
+    public void removeFriend(UUID userId, UUID friendId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
+
+        friendRepository.deleteByUserAndFriend(user, friend);
+    }
+
+    public List<UUID> getFriends(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        return friendRepository.findAllByUser(user)
+                .stream()
+                .map(f -> f.getFriend().getId())
+                .toList();
+    }
+
+
+
+}
 
