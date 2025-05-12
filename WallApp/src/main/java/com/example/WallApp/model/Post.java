@@ -7,12 +7,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.UUID;
+import com.example.WallApp.model.Subject;
+import com.example.WallApp.model.Observer;
 
 @Data
-@NoArgsConstructor
+
 @Document(collection = "post")
-public class Post {
+public class Post implements Subject {
 
     @Id
     private UUID id ;
@@ -25,8 +28,11 @@ public class Post {
     private List<UUID> likedBy ;
     private List<UUID> sharedBy ;
     private LocalDateTime createdAt ;
+    private List<Observer> observers = new ArrayList<>();
 
-    //    public Post(){}
+    public Post(){
+        this.observers = new ArrayList<>();
+    }
     private Post(PostBuilder builder) {
         this.id = UUID.randomUUID();
         this.userId = builder.userId;
@@ -35,6 +41,34 @@ public class Post {
         this.likedBy = new ArrayList<>();
         this.sharedBy = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
+        this.observers = new ArrayList<>();
+    }
+
+    @Override
+    public void registerObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(textContent, imageUrl);
+        }
+    }
+
+    public void updateObserved(String newText, String newImageUrl) {
+        this.textContent = newText;
+        this.imageUrl = newImageUrl;
+        observedChanged();
+    }
+
+    public void observedChanged() {
+        notifyObservers();
     }
 
     public UUID getId() {
@@ -51,6 +85,7 @@ public class Post {
 
     public void setTextContent(String textContent) {
         this.textContent = textContent;
+        notifyObservers();
     }
 
     public String getImageUrl() {
@@ -59,6 +94,7 @@ public class Post {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+        notifyObservers();
     }
 
     public List<UUID> getLikedBy() {
@@ -131,5 +167,7 @@ public class Post {
         public Post build() {
             return new Post(this);
         }
+    }
 }
-}
+
+

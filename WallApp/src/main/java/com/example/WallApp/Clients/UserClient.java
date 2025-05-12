@@ -11,7 +11,6 @@ import java.util.UUID;
 public interface UserClient {
 
 
-
 //  FRIENDS
 
     @GetMapping("{userId}/friends")
