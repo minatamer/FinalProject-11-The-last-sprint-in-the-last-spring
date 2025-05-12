@@ -25,14 +25,6 @@ public interface UserClient {
     public ResponseEntity<?> setSharedPost(@PathVariable("userId") UUID userId, @PathVariable("postId") UUID postId);
 
 
-//  FRIENDS
-
- @GetMapping("{userId}/friends")
-    public ResponseEntity<?> getFriends(@PathVariable("userId") UUID userId);
-
- @PostMapping("{userId}/friends/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable("userId") UUID userId, @PathVariable("friendId") UUID friendId);
-
  @GetMapping("check/{userId}")
  ResponseEntity<Boolean> checkUser(@PathVariable("userId") UUID userId);
 }

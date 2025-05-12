@@ -4,11 +4,13 @@ import com.example.WallApp.dto.PostRequest;
 import com.example.WallApp.model.Post;
 import com.example.WallApp.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,5 +71,10 @@ public class PostController {
     public ResponseEntity<?> addFriend(@PathVariable UUID userId,@PathVariable UUID friendId) {
         return postService.addFriend(userId,friendId);
     }
+    @GetMapping("{userId}/friends")
+    public ResponseEntity<?> getFriends(@PathVariable UUID userId){
+        return ResponseEntity.ok(Map.of("friends", postService.getUsersIFollow(userId)));
+    }
+
 }
 

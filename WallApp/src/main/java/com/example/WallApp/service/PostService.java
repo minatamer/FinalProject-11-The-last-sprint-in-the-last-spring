@@ -2,7 +2,9 @@ package com.example.WallApp.service;
 
 import com.example.WallApp.Clients.UserClient;
 import com.example.WallApp.dto.PostRequest;
+import com.example.WallApp.model.Follows;
 import com.example.WallApp.model.Post;
+import com.example.WallApp.repository.FollowRepository;
 import com.example.WallApp.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,20 +12,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
 
     PostRepository postRepository;
+    FollowRepository followRepository;
 
     @Autowired
     UserClient userClient;
 
     @Autowired
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, FollowRepository followRepository) {
         this.postRepository = postRepository;
+        this.followRepository = followRepository;
     }
 
     public Post addPost(PostRequest postRequest) {
@@ -94,8 +100,34 @@ public class PostService {
     //ME7TAGEEN NE LINK BEL USER MESH EL POST
 
 
-    public ResponseEntity<?> addFriend(UUID userId, UUID friendId) {
-        return userClient.addFriend(userId, friendId);
+    public List<UUID> getUsersIFollow(UUID myUserId) {
+        List<Follows> following = followRepository.findByFollowerId(myUserId);
+        return following.stream()
+                .map(Follows::getFollowedId)
+                .collect(Collectors.toList());
+    }
+    public ResponseEntity addFriend(UUID userId, UUID followedId) {
+        ResponseEntity<Boolean> responseFollower = userClient.checkUser(userId);
+        if (responseFollower.getBody() == null || !responseFollower.getBody()) {
+            throw new RuntimeException("User not found");
+        }
+        ResponseEntity<Boolean> responseFollowed = userClient.checkUser(userId);
+        if (responseFollowed.getBody() == null || !responseFollowed.getBody()) {
+            throw new RuntimeException("User not found");
+        }
+
+        if (userId.equals(followedId)) {
+            throw new RuntimeException("A user cannot follow themselves");
+        }
+
+        Follows friendship = new Follows();
+        friendship.setFollowerId(userId);
+        friendship.setFollowedId(followedId);
+        followRepository.save(friendship); // This will auto-insert with an auto-generated ID
+        Map<String, String> body = Map.of(
+                "message", "friend " + followedId + " has been added to the friends list of the user " + userId
+        );
+        return ResponseEntity.ok(body);
     }
 
     public ResponseEntity<?> sharePost(UUID userId, UUID postId) {
@@ -104,7 +136,6 @@ public class PostService {
 
 
 
-    //  ME7TAGEEN KAMAN NE3MEL FUNCTION FEL SERVICE ESMAHA ADD FRIEND
 
 }
 
