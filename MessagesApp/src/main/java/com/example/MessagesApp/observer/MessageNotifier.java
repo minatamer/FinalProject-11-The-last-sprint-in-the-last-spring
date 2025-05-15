@@ -1,13 +1,15 @@
 package com.example.MessagesApp.observer;
 
 import com.example.MessagesApp.models.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class MessageNotifier {
+public class MessageNotifier{
+
     private List<MessageObserver> observers = new ArrayList<>();
 
     public void addObserver(MessageObserver observer) {
@@ -20,7 +22,7 @@ public class MessageNotifier {
 
     public void notifyObservers(Message message) {
         for (MessageObserver observer : observers) {
-            observer.update(message);
+            observer.onMessageSent(message);
         }
     }
 }

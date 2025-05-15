@@ -7,16 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MessageFactory {
-    public Message createMessage(String type) {
-        switch (type.toUpperCase()) {
-            case "TEXT":
-                return new TextMessage();
-            case "IMAGE":
-                return new ImageMessage();
-            case "VIDEO":
-                return new VideoMessage();
-            default:
-                throw new IllegalArgumentException("Unknown message type: " + type);
-        }
+    public Message createMessage(String messageType) {
+        return switch (messageType) {
+            case "TEXT" -> new TextMessage();
+            case "IMAGE" -> new ImageMessage();
+            case "VIDEO" -> new VideoMessage();
+            default -> throw new IllegalArgumentException("Unsupported message type: " + messageType);
+        };
     }
 }

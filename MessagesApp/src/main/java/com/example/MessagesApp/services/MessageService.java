@@ -27,16 +27,7 @@ public class MessageService {
         this.messageNotifier = messageNotifier;
     }
 
-    public Chat createChat(String name, List<String> participantIds) {
-        Chat chat = new Chat();
-        chat.setName(name);
-        chat.setParticipantIds(participantIds);
-        chat.setCreatedAt(LocalDateTime.now());
-        chat.setUpdatedAt(LocalDateTime.now());
-        return chatRepository.save(chat);
-    }
-
-    public Message sendMessage(String chatId, String senderId, String content, String messageType) {
+    public Message sendMessage(String chatId, String senderId,String receiverId, String content, String messageType) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
@@ -47,6 +38,7 @@ public class MessageService {
         Message message = messageFactory.createMessage(messageType);
         message.setChatId(chatId);
         message.setSenderId(senderId);
+        message.setReceiverId(receiverId);
         message.setContent(content);
         message.setTimestamp(LocalDateTime.now());
         message.setStatus(MessageStatus.SENT);

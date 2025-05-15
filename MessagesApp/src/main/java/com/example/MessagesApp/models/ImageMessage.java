@@ -14,10 +14,17 @@ public class ImageMessage extends Message {
     public ImageMessage() {
     }
 
-    public ImageMessage(String id, String chatId, String senderId, String content, LocalDateTime timestamp, MessageStatus status) {
-        super(id, chatId, senderId, content, timestamp, status);
+    public ImageMessage(String id, String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
+        super(id, chatId, senderId, receiverId, content, timestamp, status);
+        this.caption = caption;
+        this.imageUrl = imageUrl;
     }
 
+    public ImageMessage(String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
+        super(chatId, senderId, receiverId, content, timestamp, status);
+        this.caption = caption;
+        this.imageUrl = imageUrl;
+    }
 
     public String getImageUrl() {
         return imageUrl;
@@ -38,5 +45,10 @@ public class ImageMessage extends Message {
     @Override
     public String getType() {
         return "IMAGE";
+    }
+
+    @Override
+    public String getContentPreview() {
+        return "[Image] " + getImageUrl();
     }
 }

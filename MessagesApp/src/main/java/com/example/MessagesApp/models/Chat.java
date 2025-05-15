@@ -17,19 +17,33 @@ public class Chat {
     private List<String> participantIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean pinned;
+    private boolean groupChat;
     @DBRef
     private List<Message> messages;
 
     public Chat() {
     }
 
-    public Chat(String id, String name, List<String> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages) {
+    public Chat(String id, String name, List<String> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
         this.id = id;
         this.name = name;
         this.participantIds = participantIds;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.messages = messages;
+        this.pinned = pinned;
+        this.groupChat = groupChat;
+    }
+
+    public Chat(String name, List<String> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
+        this.name = name;
+        this.participantIds = participantIds;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.messages = messages;
+        this.pinned = pinned;
+        this.groupChat = groupChat;
     }
 
     public String getId() {
@@ -78,5 +92,21 @@ public class Chat {
 
     public void setMessages(List<Message> messages) {
         this.messages = messages;
+    }
+
+    public boolean isGroupChat() {
+        return groupChat;
+    }
+
+    public void setGroupChat(boolean groupChat) {
+        this.groupChat = groupChat;
+    }
+
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
     }
 }
