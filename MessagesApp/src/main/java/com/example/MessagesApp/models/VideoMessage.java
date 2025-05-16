@@ -1,11 +1,9 @@
 package com.example.MessagesApp.models;
 
-import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Data
 @Document(collection = "messages")
 public class VideoMessage extends Message {
     private String videoUrl;
@@ -18,6 +16,11 @@ public class VideoMessage extends Message {
     }
 
     public VideoMessage() {
+    }
+
+    @Override
+    public String getContentPreview() {
+        return "[Video] " + getVideoUrl();
     }
 
     public VideoMessage(String id, String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String videoUrl, int duration, long size) {

@@ -1,9 +1,12 @@
 package com.example.MessagesApp.services;
 import com.example.MessagesApp.factory.MessageFactory;
 import com.example.MessagesApp.models.*;
+import com.example.MessagesApp.config.RabbitMQConfig;
+import com.example.MessagesApp.config.RabbitMQProducer;
 import com.example.MessagesApp.observer.MessageNotifier;
 import com.example.MessagesApp.repositories.ChatRepository;
 import com.example.MessagesApp.repositories.MessageRepository;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -15,6 +18,9 @@ public class MessageService {
     private final ChatRepository chatRepository;
     private final MessageFactory messageFactory;
     private final MessageNotifier messageNotifier;
+
+    @Autowired
+    private RabbitMQProducer rabbitMQProducer;
 
     @Autowired
     public MessageService(MessageRepository messageRepository,
@@ -51,6 +57,7 @@ public class MessageService {
 
         // Notify observers
         messageNotifier.notifyObservers(savedMessage);
+        this.rabbitMQProducer.sendToUser(message.getContent(), message.getSenderId());
 
         return savedMessage;
     }
@@ -81,5 +88,11 @@ public class MessageService {
         Message updatedMessage = messageRepository.save(message);
         messageNotifier.notifyObservers(updatedMessage);
         return updatedMessage;
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.MESSAGE_QUEUE)
+    public void notifyUser(String senderId, String receiverId, String messageId) {
+
+        System.out.println("Received message with id: " + messageId + " from userId: " + senderId + " to userId: " + receiverId);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.MessagesApp.controllers;
 import com.example.MessagesApp.models.Message;
 import com.example.MessagesApp.models.*;
+import com.example.MessagesApp.services.ChatService;
 import com.example.MessagesApp.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,18 +11,25 @@ import java.util.List;
 @RequestMapping("/api/messages")
 public class MessageController {
     private final MessageService messageService;
+    private final ChatService chatService;
 
     @Autowired
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, ChatService chatService) {
         this.messageService = messageService;
+        this.chatService = chatService;
     }
 
-    @PostMapping("/chats")
+    @PostMapping("/chat/createChat")
     public Chat createChat(@RequestParam String name, @RequestBody List<String> participantIds) {
-        return messageService.createChat(name, participantIds);
+        return chatService.createChat(participantIds, name);
     }
 
-    @GetMapping("/chats/user/{userId}")
+    @PostMapping("/chat/addUser")
+    public Chat addParticipant(@RequestBody String chatId, @RequestBody String userId) {
+        return chatService.addParticipant(chatId, userId);
+    }
+
+    @GetMapping("/chat/user/{userId}")
     public List<Chat> getUserChats(@PathVariable String userId) {
         return messageService.getUserChats(userId);
     }
@@ -30,9 +38,10 @@ public class MessageController {
     public Message sendMessage(
             @RequestParam String chatId,
             @RequestParam String senderId,
+            @RequestParam String receiverId,
             @RequestParam String content,
             @RequestParam String messageType) {
-        return messageService.sendMessage(chatId, senderId, content, messageType);
+        return messageService.sendMessage(chatId, senderId, receiverId, content, messageType);
     }
 
     @GetMapping("/chat/{chatId}")
@@ -43,6 +52,16 @@ public class MessageController {
     @PutMapping("/seen/{chatId}/{userId}")
     public void markMessagesAsSeen(@PathVariable String chatId, @PathVariable String userId) {
         messageService.markMessagesAsSeen(chatId, userId);
+    }
+
+    @PutMapping("/chat/pin/{chatId}")
+    public void pinChat(@PathVariable String chatId) {
+        chatService.pinChat(chatId);
+    }
+
+    @PutMapping("/chat/unpin/{chatId}")
+    public void unpinChat(@PathVariable String chatId) {
+        chatService.unpinChat(chatId);
     }
 
     @PutMapping("/status/{messageId}")

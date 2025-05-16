@@ -1,12 +1,10 @@
 package com.example.MessagesApp.models;
 
-import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Data
 @Document(collection = "messages")
 public abstract class Message {
     @Id
