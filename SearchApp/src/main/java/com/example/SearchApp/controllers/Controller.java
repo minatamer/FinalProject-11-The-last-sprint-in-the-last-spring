@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -27,6 +28,27 @@ public class Controller
     public List<PostDTO> searchPosts(@RequestParam String searchQuery)
     {
         return searchService.searchPosts(searchQuery);
+    }
+
+    @PostMapping("/post/filter")
+    public List<PostDTO> filterPosts(@RequestParam List<PostDTO> posts,
+                                     @RequestParam Boolean likes, @RequestParam Integer minLikes, @RequestParam Integer maxLikes,
+                                     @RequestParam Boolean shares, @RequestParam Integer minShares, @RequestParam Integer maxShares,
+                                     @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
+    {
+        return searchService.filterPosts(posts, likes, minLikes, maxLikes, shares, minShares, maxShares, date, startDate, endDate);
+    }
+
+    @PostMapping("/post/undoFilters")
+    public List<PostDTO> undoFilterPosts( @RequestParam Boolean likes, @RequestParam Boolean shares, @RequestParam Boolean date)
+    {
+        return searchService.undoFilterPosts(likes, shares, date);
+    }
+
+    @PostMapping("/post/sort")
+    public List<PostDTO> sortPosts(@RequestParam List<PostDTO> posts, @RequestParam String sortCriteria , @RequestParam String sortOrder)
+    {
+        return searchService.sortPosts(posts, sortCriteria, sortOrder);
     }
 
 
