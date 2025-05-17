@@ -69,7 +69,7 @@ public class Controller
 
 
     @PostMapping("/user/undoFilters")
-    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam String gender)
+    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam Boolean gender)
     {
         return searchService.undoFilterUsers(age,gender);
     }
