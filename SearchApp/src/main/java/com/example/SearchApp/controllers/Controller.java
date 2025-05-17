@@ -4,10 +4,7 @@ import com.example.SearchApp.model.PostDTO;
 import com.example.SearchApp.model.UserDTO;
 import com.example.SearchApp.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,7 +29,7 @@ public class Controller
     }
 
     @PostMapping("/post/filter")
-    public List<PostDTO> filterPosts(@RequestParam List<PostDTO> posts,
+    public List<PostDTO> filterPosts(@RequestBody List<PostDTO> posts,
                                      @RequestParam Boolean likes, @RequestParam Integer minLikes,  @RequestParam Integer maxLikes,
                                      @RequestParam Boolean shares, @RequestParam Integer minShares, @RequestParam Integer maxShares,
                                      @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
@@ -61,17 +58,20 @@ public class Controller
     }
 
     @PostMapping("/user/filter")
-    public List<UserDTO> filterUsers(@RequestParam List<UserDTO> users,
-                                     @RequestParam Boolean age, @RequestParam Integer minAge,  @RequestParam Integer maxAge,
-                                     @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
-    {
-        return searchService.filterUsers(users,age,minAge,maxAge,date,startDate,endDate);
+    public List<UserDTO> filterUsers(@RequestBody List<UserDTO> users,
+                                     @RequestParam Boolean age,
+                                     @RequestParam Integer minAge,
+                                     @RequestParam Integer maxAge,
+                                     @RequestParam Boolean gender,
+                                     @RequestParam String genderToMatch) {
+        return searchService.filterUsers(users, age, minAge, maxAge, gender, genderToMatch);
     }
 
+
     @PostMapping("/user/undoFilters")
-    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam Boolean date)
+    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam String gender)
     {
-        return searchService.undoFilterUsers(age,date);
+        return searchService.undoFilterUsers(age,gender);
     }
 
     @PostMapping("/user/sort")

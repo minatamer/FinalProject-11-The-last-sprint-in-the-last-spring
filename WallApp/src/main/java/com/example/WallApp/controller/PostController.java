@@ -2,6 +2,7 @@ package com.example.WallApp.controller;
 
 import com.example.WallApp.dto.PostRequest;
 import com.example.WallApp.model.Post;
+import com.example.WallApp.repository.PostRepository;
 import com.example.WallApp.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 @RequestMapping("/wallApp/posts")

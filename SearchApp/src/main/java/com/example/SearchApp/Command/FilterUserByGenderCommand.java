@@ -1,20 +1,20 @@
 package com.example.SearchApp.Command;
 
-import com.example.SearchApp.model.PostDTO;
 import com.example.SearchApp.model.UserDTO;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class  FilterUserByAgeCommand implements FilterCommand<UserDTO> {
-    private int minAge;
-    private int maxAge;
+
+public class FilterUserByGenderCommand implements FilterCommand<UserDTO> {
+
+    private final String gender;
     private List<UserDTO> backup;
 
-    public FilterUserByAgeCommand(int minAge, int maxAge) {
-        this.minAge = minAge;
-        this.maxAge = maxAge;
+    public FilterUserByGenderCommand(String gender) {
+        this.gender = gender.trim().toLowerCase(); // normalize for comparison
     }
 
     @Override
@@ -22,10 +22,7 @@ public class  FilterUserByAgeCommand implements FilterCommand<UserDTO> {
         backup = new ArrayList<>(users);
 
         return users.stream()
-                .filter(p -> {
-                    int age = p.getAge();
-                    return age >= minAge && age <= maxAge;
-                })
+                .filter(u -> u.getGender() != null && u.getGender().trim().toLowerCase().equals(gender))
                 .collect(Collectors.toList());
     }
 
@@ -33,5 +30,4 @@ public class  FilterUserByAgeCommand implements FilterCommand<UserDTO> {
     public List<UserDTO> undo() {
         return backup;
     }
-
 }

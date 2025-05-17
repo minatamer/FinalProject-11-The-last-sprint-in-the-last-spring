@@ -16,6 +16,7 @@ public class UserDTO {
     //filtering
     private int age;
     private LocalDateTime createdAt;
+    private String gender;
 
     public UserDTO() {
     }
@@ -66,5 +67,9 @@ public class UserDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getGender() {
+        return gender;
     }
 }
