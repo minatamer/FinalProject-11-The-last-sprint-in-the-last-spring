@@ -29,7 +29,7 @@ public class Controller
     }
 
     @PostMapping("/post/filter")
-    public List<PostDTO> filterPosts(@RequestParam List<PostDTO> posts,
+    public List<PostDTO> filterPosts(@RequestBody List<PostDTO> posts,
                                      @RequestParam Boolean likes, @RequestParam Integer minLikes,  @RequestParam Integer maxLikes,
                                      @RequestParam Boolean shares, @RequestParam Integer minShares, @RequestParam Integer maxShares,
                                      @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
