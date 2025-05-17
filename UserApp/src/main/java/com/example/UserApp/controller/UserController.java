@@ -7,6 +7,7 @@ import com.example.UserApp.service.DatabasePopulatorService;
 import com.example.UserApp.strategy.LoginContext;
 import com.example.UserApp.strategy.OtpLoginStrategy;
 import com.example.UserApp.strategy.PasswordLoginStrategy;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,18 @@ public class UserController {
         userService.populateRandomUsers();
         databasePopulatorService.populateUsers();
     }
+
+    @PostMapping("/dummyData")
+    public void createDummyData() {
+        databasePopulatorService.createDummyUsers();
+    }
+
+    @DeleteMapping("/wipe")
+    public ResponseEntity<String> wipeAllUsers() {
+        userRepository.deleteAll();
+        return ResponseEntity.ok("All users have been deleted successfully.");
+    }
+
 
     @PostMapping("/")
     public ResponseEntity<?> createUser(@RequestBody User user,
@@ -191,40 +204,87 @@ public class UserController {
 
     //Blocking User APIs
     @PostMapping("/{userId}/block/{targetId}")
-    public ResponseEntity<String> blockUser(@PathVariable UUID userId, @PathVariable UUID targetId) {
+    public ResponseEntity<String> blockUser(@PathVariable UUID userId,
+                                            @PathVariable UUID targetId,
+                                            @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+
         userService.blockUser(userId, targetId);
         return ResponseEntity.ok("User blocked successfully.");
     }
 
     @DeleteMapping("/{userId}/unblock/{targetId}")
-    public ResponseEntity<String> unblockUser(@PathVariable UUID userId, @PathVariable UUID targetId) {
+    public ResponseEntity<String> unblockUser(@PathVariable UUID userId,
+                                              @PathVariable UUID targetId,
+                                              @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+
         userService.unblockUser(userId, targetId);
         return ResponseEntity.ok("User unblocked successfully.");
     }
 
     @GetMapping("/{userId}/blocked-users")
-    public ResponseEntity<List<UUID>> getBlockedUserIds(@PathVariable UUID userId) {
+    public ResponseEntity<?> getBlockedUserIds(@PathVariable UUID userId,
+                                               @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+
         List<UUID> blockedUserIds = userService.getBlockedUserIds(userId);
         return ResponseEntity.ok(blockedUserIds);
     }
 
-    //Friend APIs
+// Friend APIs
+
     @PostMapping("/{userId}/friend/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
+    public ResponseEntity<?> addFriend(@PathVariable UUID userId,
+                                       @PathVariable UUID friendId,
+                                       @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
 
         return ResponseEntity.ok(userService.addFriend(userId, friendId));
     }
 
     @DeleteMapping("/{userId}/unfriend/{friendId}")
-    public ResponseEntity<?> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId) {
+    public ResponseEntity<?> removeFriend(@PathVariable UUID userId,
+                                          @PathVariable UUID friendId,
+                                          @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+
         userService.removeFriend(userId, friendId);
         return ResponseEntity.ok("Friend removed.");
     }
 
     @GetMapping("/{userId}/friends")
-    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId) {
+    public ResponseEntity<?> getFriends(@PathVariable UUID userId,
+                                        @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
+
         return ResponseEntity.ok(userService.getFriends(userId));
-}
+    }
+
+
+    @GetMapping("/validate-token/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token) {
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("valid", false, "message", "Missing token"));
+        }
+
+        boolean valid = userService.isValidToken(token);
+        return ResponseEntity.ok(Map.of("valid", valid));
+    }
+
+
 
 
 }
