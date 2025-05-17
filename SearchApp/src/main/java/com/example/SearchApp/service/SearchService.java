@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Iterator;
 
 @Service
 public class SearchService {
@@ -71,42 +72,45 @@ public class SearchService {
     }
 
 
-    public List<PostDTO> undoFilterPosts(boolean likes, boolean shares, boolean date)
-    {
+    public List<PostDTO> undoFilterPosts(boolean likes, boolean shares, boolean date) {
         List<FilterCommand<PostDTO>> commandHistory = postsFilterInvoker.getCommandHistory();
         List<PostDTO> undonePosts = new ArrayList<>();
 
-        // Get the earliest version of the posts using reflection
-        for (FilterCommand<PostDTO> command : commandHistory)
-        {
+        // Step 1: Identify the command to undo (first matching one)
+        FilterCommand<PostDTO> toUndo = null;
+        for (FilterCommand<PostDTO> command : commandHistory) {
             String className = command.getClass().getSimpleName();
-
-            if ( (className.equals("FilterPostByLikesCommand") && likes) || (className.equals("FilterPostBySharesCommand") && shares)
-                    || (className.equals("FilterPostByDateCommand") && date) )
-            {
-                undonePosts = command.undo();
-                commandHistory.remove(command);
+            if ((className.equals("FilterPostByLikesCommand") && likes) ||
+                    (className.equals("FilterPostBySharesCommand") && shares) ||
+                    (className.equals("FilterPostByDateCommand") && date)) {
+                toUndo = command;
                 break;
             }
-
         }
 
-        //Remove the filters that are supposed to be undone you got the earliest version so by that u can apply the filters
-        //that aren't supposed to be undone safely
-        for (FilterCommand<PostDTO> command : commandHistory)
-        {
+        if (toUndo != null) {
+            // Undo that filter
+            undonePosts = toUndo.undo();
+            commandHistory.remove(toUndo);
+        }
+
+        // Step 2: Remove other filters that are also requested to be undone
+        Iterator<FilterCommand<PostDTO>> iterator = commandHistory.iterator();
+        while (iterator.hasNext()) {
+            FilterCommand<PostDTO> command = iterator.next();
             String className = command.getClass().getSimpleName();
 
-            if ( (className.equals("FilterPostByLikesCommand") && likes) || (className.equals("FilterPostBySharesCommand") && shares)
-                    || (className.equals("FilterPostByDateCommand") && date) )
-                commandHistory.remove(command);
-
+            if ((className.equals("FilterPostByLikesCommand") && likes) ||
+                    (className.equals("FilterPostBySharesCommand") && shares) ||
+                    (className.equals("FilterPostByDateCommand") && date)) {
+                iterator.remove(); // ✅ safe removal
+            }
         }
 
-        //Apply remaining filters
-        for (FilterCommand<PostDTO> command : commandHistory)
+        // Step 3: Re-apply remaining filters (if any)
+        for (FilterCommand<PostDTO> command : commandHistory) {
             undonePosts = command.execute(undonePosts);
-
+        }
 
         return undonePosts;
     }
@@ -151,62 +155,54 @@ public class SearchService {
     }
 
     public List<UserDTO> filterUsers(List<UserDTO> users,
-                                     boolean age, int minAge,   int maxAge,
-                                     boolean date, LocalDate startDate ,  LocalDate endDate)
-    {
+                                     boolean age, int minAge, int maxAge,
+                                     boolean gender, String genderToMatch) {
         List<UserDTO> filteredUsers = new ArrayList<>(users);
 
-        if (age)
-        {
+        if (age) {
             userFilterInvoker.setCommand(new FilterUserByAgeCommand(minAge, maxAge));
             filteredUsers = userFilterInvoker.filter(filteredUsers);
         }
-        if(date)
-        {
-            userFilterInvoker.setCommand(new FilterUserByDateCommand(startDate, endDate));
+
+
+        if (gender) {
+            userFilterInvoker.setCommand(new FilterUserByGenderCommand(genderToMatch));
             filteredUsers = userFilterInvoker.filter(filteredUsers);
         }
+
         return filteredUsers.stream()
-                .distinct() // Requires UserDTO to implement equals() and hashCode()
+                .distinct()
                 .collect(Collectors.toList());
     }
 
-    public List<UserDTO> undoFilterUsers(boolean age, boolean date)
-    {
+    public List<UserDTO> undoFilterUsers(boolean age, boolean gender) {
         List<FilterCommand<UserDTO>> commandHistory = userFilterInvoker.getCommandHistory();
-        List<UserDTO> undoneUsers = new ArrayList<>();
 
-        // Get the earliest version of the posts using reflection
-        for (FilterCommand<UserDTO> command : commandHistory)
-        {
+        List<String> filtersToUndo = new ArrayList<>();
+        if (age) filtersToUndo.add("FilterUserByAgeCommand");
+        if (gender) filtersToUndo.add("FilterUserByGenderCommand");
+
+        List<FilterCommand<UserDTO>> originalHistory = new ArrayList<>(commandHistory);
+
+        List<UserDTO> baseUsers = new ArrayList<>();
+        for (FilterCommand<UserDTO> command : originalHistory) {
             String className = command.getClass().getSimpleName();
-
-            if ( (className.equals("FilterUserByAgeCommand") && age) || (className.equals("FilterUserByDateCommand") && date) )
-            {
-                undoneUsers = command.undo();
-                commandHistory.remove(command);
+            if (filtersToUndo.contains(className)) {
+                baseUsers = command.undo();
                 break;
             }
-
         }
 
-        //Remove the filters that are supposed to be undone you got the earliest version so by that u can apply the filters
-        //that aren't supposed to be undone safely
-        for (FilterCommand<UserDTO> command : commandHistory)
-        {
-            String className = command.getClass().getSimpleName();
+        if (baseUsers.isEmpty()) return new ArrayList<>();
 
-            if ( (className.equals("FilterUserByAgeCommand") && age) || (className.equals("FilterUserByDateCommand") && date) )
-                commandHistory.remove(command);
+        commandHistory.removeIf(cmd -> filtersToUndo.contains(cmd.getClass().getSimpleName()));
 
+        List<UserDTO> result = baseUsers;
+        for (FilterCommand<UserDTO> command : commandHistory) {
+            result = command.execute(result);
         }
 
-        //Apply remaining filters
-        for (FilterCommand<UserDTO> command : commandHistory)
-            undoneUsers = command.execute(undoneUsers);
-
-
-        return undoneUsers;
+        return result;
     }
 
     public List<UserDTO> sortUsers(List<UserDTO> users, String sortCriteria, String sortOrder) {

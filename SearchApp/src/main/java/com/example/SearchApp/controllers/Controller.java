@@ -59,16 +59,20 @@ public class Controller
 
     @PostMapping("/user/filter")
     public List<UserDTO> filterUsers(@RequestBody List<UserDTO> users,
-                                     @RequestParam Boolean age, @RequestParam Integer minAge,  @RequestParam Integer maxAge,
-                                     @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
-    {
-        return searchService.filterUsers(users,age,minAge,maxAge,date,startDate,endDate);
+                                     @RequestParam Boolean age,
+                                     @RequestParam Integer minAge,
+                                     @RequestParam Integer maxAge,
+                                     @RequestParam Boolean gender,
+                                     @RequestParam String genderToMatch) {
+        return searchService.filterUsers(users, age, minAge, maxAge, gender, genderToMatch);
+
     }
 
+
     @PostMapping("/user/undoFilters")
-    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam Boolean date)
+    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam Boolean gender)
     {
-        return searchService.undoFilterUsers(age,date);
+        return searchService.undoFilterUsers(age,gender);
     }
 
     @PostMapping("/user/sort")
