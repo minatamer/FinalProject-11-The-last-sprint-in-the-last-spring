@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
@@ -28,6 +29,34 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
+    @Transactional
+    public void populateDummyPosts(){
+
+        Post postSalah = new Post.PostBuilder()
+                .Id(UUID.fromString("44444444-4444-4444-4444-444444444444"))
+                .UserId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+                .TextContent("Post Salah text content")
+                .ImageUrl("Post Salah image URL")
+                .build();
+        postRepository.save(postSalah);
+
+        Post postMessi = new Post.PostBuilder()
+                .Id(UUID.fromString("55555555-5555-5555-5555-555555555555"))
+                .UserId( UUID.fromString("22222222-2222-2222-2222-222222222222"))
+                .TextContent("Post Messi text content")
+                .ImageUrl("Post Messi image URL")
+                .build();
+        postRepository.save(postMessi);
+
+        Post post3amoora = new Post.PostBuilder()
+                .Id(UUID.fromString("66666666-6666-6666-6666-666666666666"))
+                .UserId( UUID.fromString("33333333-3333-3333-3333-333333333333"))
+                .TextContent("Post 3amoora text content")
+                .ImageUrl("Post 3amoora image URL")
+                .build();
+        postRepository.save(post3amoora);
+
+    }
     public Post addPost(PostRequest postRequest) {
         // Validate the post content
         if ((postRequest.getTextContent() == null || postRequest.getTextContent().isBlank()) &&

@@ -30,6 +30,11 @@ public class PostController {
         return ResponseEntity.ok(postService.addPost(postRequest));
     }
 
+    @PostMapping("/dummy")
+    public void populateDummyPosts() {
+        postService.populateDummyPosts();
+    }
+
     @GetMapping("/all")
     public List<Post> getAllPosts() {
         return postService.getAllPosts();
