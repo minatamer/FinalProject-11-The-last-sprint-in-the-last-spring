@@ -65,6 +65,7 @@ public class Controller
                                      @RequestParam Boolean gender,
                                      @RequestParam String genderToMatch) {
         return searchService.filterUsers(users, age, minAge, maxAge, gender, genderToMatch);
+
     }
 
 

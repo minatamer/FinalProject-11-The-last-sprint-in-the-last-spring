@@ -8,8 +8,8 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
     private UUID id;
 
     private String username;
@@ -18,7 +18,7 @@ public class User {
     private String phoneNumber;
     private int age;
     private String gender;
-    private LocalDateTime createdAt = LocalDateTime.now();
+//    private LocalDateTime createdAt = LocalDateTime.now();
     private String token;
     private boolean isTwoFactorEnabled = false;
     private String otp;
@@ -33,6 +33,20 @@ public class User {
         this.age = age;
         this.gender = gender;
     }
+    public User(UUID id, String username, String email, String password, String phoneNumber, int age, String gender, String token, boolean isTwoFactorEnabled, String otp) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.age = age;
+        this.gender = gender;
+        this.token = token;
+        this.isTwoFactorEnabled = isTwoFactorEnabled;
+        this.otp = otp;
+    }
+
+
 
     // Getters and setters...
 
@@ -57,8 +71,8 @@ public class User {
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+//    public LocalDateTime getCreatedAt() { return createdAt; }
+//    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public String getToken() {
         return token;
@@ -72,6 +86,7 @@ public class User {
 
     public String getOtp() { return otp; }
     public void setOtp(String otp) { this.otp = otp; }
+
     @Override
     public String toString() {
         return "User{" +

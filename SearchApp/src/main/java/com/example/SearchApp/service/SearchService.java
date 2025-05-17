@@ -164,6 +164,7 @@ public class SearchService {
             filteredUsers = userFilterInvoker.filter(filteredUsers);
         }
 
+
         if (gender) {
             userFilterInvoker.setCommand(new FilterUserByGenderCommand(genderToMatch));
             filteredUsers = userFilterInvoker.filter(filteredUsers);
