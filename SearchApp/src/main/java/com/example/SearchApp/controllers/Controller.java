@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,7 +33,7 @@ public class Controller
 
     @PostMapping("/post/filter")
     public List<PostDTO> filterPosts(@RequestParam List<PostDTO> posts,
-                                     @RequestParam Boolean likes, @RequestParam Integer minLikes, @RequestParam Integer maxLikes,
+                                     @RequestParam Boolean likes, @RequestParam Integer minLikes,  @RequestParam Integer maxLikes,
                                      @RequestParam Boolean shares, @RequestParam Integer minShares, @RequestParam Integer maxShares,
                                      @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
     {
@@ -51,16 +52,32 @@ public class Controller
         return searchService.sortPosts(posts, sortCriteria, sortOrder);
     }
 
-
     //-----------------------------------------------Users-----------------------------------------------------//
 
     @PostMapping("/user/search")
     public List<UserDTO> searchUsers(@RequestParam String searchQuery)
     {
-
         return searchService.searchUsers(searchQuery);
     }
 
+    @PostMapping("/user/filter")
+    public List<UserDTO> filterUsers(@RequestParam List<UserDTO> users,
+                                     @RequestParam Boolean age, @RequestParam Integer minAge,  @RequestParam Integer maxAge,
+                                     @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
+    {
+        return searchService.filterUsers(users,age,minAge,maxAge,date,startDate,endDate);
+    }
 
+    @PostMapping("/user/undoFilters")
+    public List<UserDTO> undoFilterUsers( @RequestParam Boolean age, @RequestParam Boolean date)
+    {
+        return searchService.undoFilterUsers(age,date);
+    }
+
+    @PostMapping("/user/sort")
+    public List<UserDTO> sortUsers(@RequestParam List<UserDTO> users,@RequestParam String sortCriteria , @RequestParam String sortOrder)
+    {
+        return searchService.sortUsers(users, sortCriteria, sortOrder);
+    }
 
 }

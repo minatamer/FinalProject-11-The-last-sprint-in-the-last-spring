@@ -1,8 +1,11 @@
 package com.example.SearchApp.Command;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class FilterInvoker<T> {
     private FilterCommand<T> command;
     private List<FilterCommand<T>> commandHistory = new ArrayList<>();

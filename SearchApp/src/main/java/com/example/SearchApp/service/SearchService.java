@@ -6,8 +6,8 @@ import com.example.SearchApp.Command.*;
 import com.example.SearchApp.Strategy.SearchStrategy;
 import com.example.SearchApp.model.PostDTO;
 import com.example.SearchApp.model.UserDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,19 +19,19 @@ import java.util.stream.Collectors;
 @Service
 public class SearchService {
 
-     UserClient userClient;
-     WallClient wallClient;
-     Map<String, SearchStrategy<?>> strategyMap;
-     FilterInvoker<PostDTO> postsFilterInvoker;
-
+    UserClient userClient;
+    WallClient wallClient;
+    Map<String, SearchStrategy<?>> strategyMap;
+    FilterInvoker<PostDTO> postsFilterInvoker;
+    FilterInvoker<UserDTO> userFilterInvoker;
 
     @Autowired
-    public SearchService(UserClient userClient, WallClient wallClient, Map<String, SearchStrategy<?>> strategyMap, FilterInvoker<PostDTO>postsFilterInvoker) {
+    public SearchService(UserClient userClient, WallClient wallClient, Map<String, SearchStrategy<?>> strategyMap, FilterInvoker<PostDTO> postsFilterInvoker, FilterInvoker<UserDTO> userFilterInvoker) {
         this.userClient = userClient;
         this.wallClient = wallClient;
         this.strategyMap = strategyMap;
         this.postsFilterInvoker = postsFilterInvoker;
-
+        this.userFilterInvoker = userFilterInvoker;
     }
 
 
@@ -46,9 +46,9 @@ public class SearchService {
     }
 
     public List<PostDTO> filterPosts(List<PostDTO> posts,
-                                     boolean likes, int minLikes, int maxLikes,
-                                     boolean shares, int minShares, int maxShares,
-                                     boolean date, LocalDate startDate , LocalDate endDate)
+                                     boolean likes, int minLikes,   int maxLikes,
+                                     boolean shares, int minShares,  int maxShares,
+                                     boolean date, LocalDate startDate ,  LocalDate endDate)
     {
         List<PostDTO> filteredPosts = new ArrayList<>(posts);
 
@@ -116,7 +116,7 @@ public class SearchService {
         sortCriteria = sortCriteria.toLowerCase().trim();
         sortOrder = sortOrder.toLowerCase().trim();
 
-        switch (sortCriteria.toLowerCase()) {
+        switch (sortCriteria.toLowerCase().trim()) {
             case "likes":
                 comparator = Comparator.comparingInt(p -> p.getLikedBy().size());
                 break;
@@ -139,21 +139,97 @@ public class SearchService {
                 .collect(Collectors.toList());
     }
 
-
-
-
     //-----------------------------------------------Users-----------------------------------------------------//
 
     public List<UserDTO> searchUsers(String searchQuery)
     {
+        userFilterInvoker.setCommandHistory( new ArrayList<>());
         List<UserDTO> users = userClient.getUsers("");
         @SuppressWarnings("unchecked")
         SearchStrategy<UserDTO> userStrategy = (SearchStrategy<UserDTO>) strategyMap.get("userSearchStrategy");
         return userStrategy.search(users,searchQuery);
     }
 
+    public List<UserDTO> filterUsers(List<UserDTO> users,
+                                     boolean age, int minAge,   int maxAge,
+                                     boolean date, LocalDate startDate ,  LocalDate endDate)
+    {
+        List<UserDTO> filteredUsers = new ArrayList<>(users);
+
+        if (age)
+        {
+            userFilterInvoker.setCommand(new FilterUserByAgeCommand(minAge, maxAge));
+            filteredUsers = userFilterInvoker.filter(filteredUsers);
+        }
+        else if(date)
+        {
+            userFilterInvoker.setCommand(new FilterUserByDateCommand(startDate, endDate));
+            filteredUsers = userFilterInvoker.filter(filteredUsers);
+        }
+        return filteredUsers;
+    }
+
+    public List<UserDTO> undoFilterUsers(boolean age, boolean date)
+    {
+        List<FilterCommand<UserDTO>> commandHistory = userFilterInvoker.getCommandHistory();
+        List<UserDTO> undoneUsers = new ArrayList<>();
+
+        // Get the earliest version of the posts using reflection
+        for (FilterCommand<UserDTO> command : commandHistory)
+        {
+            String className = command.getClass().getSimpleName();
+
+            if ( (className.equals("FilterUserByAgeCommand") && age) || (className.equals("FilterUserByDateCommand") && date) )
+            {
+                undoneUsers = command.undo();
+                commandHistory.remove(command);
+                break;
+            }
+
+        }
+
+        //Remove the filters that are supposed to be undone you got the earliest version so by that u can apply the filters
+        //that aren't supposed to be undone safely
+        for (FilterCommand<UserDTO> command : commandHistory)
+        {
+            String className = command.getClass().getSimpleName();
+
+            if ( (className.equals("FilterUserByAgeCommand") && age) || (className.equals("FilterUserByDateCommand") && date) )
+                commandHistory.remove(command);
+
+        }
+
+        //Apply remaining filters
+        for (FilterCommand<UserDTO> command : commandHistory)
+            undoneUsers = command.execute(undoneUsers);
 
 
+        return undoneUsers;
+    }
 
+    public List<UserDTO> sortUsers(List<UserDTO> users, String sortCriteria, String sortOrder) {
+        Comparator<UserDTO> comparator;
+        sortCriteria = sortCriteria.toLowerCase().trim();
+        sortOrder = sortOrder.toLowerCase().trim();
 
+        switch (sortCriteria.toLowerCase()) {
+            case "age":
+                comparator = Comparator.comparingInt(UserDTO::getAge);
+                break;
+            case "date":
+                comparator = Comparator.comparing(UserDTO::getCreatedAt);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown sort criteria: " + sortCriteria);
+        }
+
+        if ("desc".equals(sortOrder)) {
+            comparator = comparator.reversed();
+        }
+
+        return users.stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
+    }
 }
+
