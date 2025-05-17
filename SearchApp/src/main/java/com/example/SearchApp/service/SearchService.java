@@ -57,17 +57,17 @@ public class SearchService {
             postsFilterInvoker.setCommand(new FilterPostByLikesCommand(minLikes, maxLikes));
             filteredPosts = postsFilterInvoker.filter(filteredPosts);
         }
-        else if (shares)
+        if (shares)
         {
             postsFilterInvoker.setCommand(new FilterPostBySharesCommand(minShares, maxShares));
             filteredPosts = postsFilterInvoker.filter(filteredPosts);
         }
-        else if(date)
+        if(date)
         {
             postsFilterInvoker.setCommand(new FilterPostByDateCommand(startDate, endDate));
             filteredPosts = postsFilterInvoker.filter(filteredPosts);
         }
-        return filteredPosts;
+        return filteredPosts.stream().distinct().collect(Collectors.toList());
     }
 
 
@@ -161,12 +161,14 @@ public class SearchService {
             userFilterInvoker.setCommand(new FilterUserByAgeCommand(minAge, maxAge));
             filteredUsers = userFilterInvoker.filter(filteredUsers);
         }
-        else if(date)
+        if(date)
         {
             userFilterInvoker.setCommand(new FilterUserByDateCommand(startDate, endDate));
             filteredUsers = userFilterInvoker.filter(filteredUsers);
         }
-        return filteredUsers;
+        return filteredUsers.stream()
+                .distinct() // Requires UserDTO to implement equals() and hashCode()
+                .collect(Collectors.toList());
     }
 
     public List<UserDTO> undoFilterUsers(boolean age, boolean date)

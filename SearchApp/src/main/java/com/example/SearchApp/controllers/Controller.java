@@ -4,10 +4,7 @@ import com.example.SearchApp.model.PostDTO;
 import com.example.SearchApp.model.UserDTO;
 import com.example.SearchApp.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -61,7 +58,7 @@ public class Controller
     }
 
     @PostMapping("/user/filter")
-    public List<UserDTO> filterUsers(@RequestParam List<UserDTO> users,
+    public List<UserDTO> filterUsers(@RequestBody List<UserDTO> users,
                                      @RequestParam Boolean age, @RequestParam Integer minAge,  @RequestParam Integer maxAge,
                                      @RequestParam Boolean date, @RequestParam LocalDate startDate , @RequestParam LocalDate endDate)
     {
