@@ -214,8 +214,8 @@ public class SearchService {
             case "age":
                 comparator = Comparator.comparingInt(UserDTO::getAge);
                 break;
-            case "date":
-                comparator = Comparator.comparing(UserDTO::getCreatedAt);
+            case "gender":
+                comparator = Comparator.comparing(UserDTO::getGender);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown sort criteria: " + sortCriteria);
