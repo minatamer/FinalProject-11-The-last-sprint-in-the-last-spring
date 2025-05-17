@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: searchapp
+
+  data:
+    mongodb:
+      uri: mongodb://root:example@localhost:27017/post?authSource=admin
+
+    mongo-express:
+      image: mongo-express
+      ports:
+        - "9000:8081"
+      environment:
+        - ME_CONFIG_MONGODB_SERVER=mongo
+      depends_on:
+        - mongo
+
+    rabbitmq:
+      host: rabbitmq
+      port: 5672
+      username: root
+      password: example
+
+server:
+  port: 8090

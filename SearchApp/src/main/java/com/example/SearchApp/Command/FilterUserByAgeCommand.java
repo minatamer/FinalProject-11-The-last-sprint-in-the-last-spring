@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FilterUserByAgeCommand implements FilterCommand<UserDTO> {
+public class  FilterUserByAgeCommand implements FilterCommand<UserDTO> {
     private int minAge;
     private int maxAge;
     private List<UserDTO> backup;
