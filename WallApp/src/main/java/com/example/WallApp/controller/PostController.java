@@ -1,15 +1,19 @@
 package com.example.WallApp.controller;
 
+import com.example.WallApp.Clients.UserClient;
 import com.example.WallApp.dto.PostRequest;
 import com.example.WallApp.model.Post;
 import com.example.WallApp.repository.PostRepository;
 import com.example.WallApp.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,35 +25,76 @@ public class PostController {
     private final PostService postService;
 
     @Autowired
+    UserClient  userClient;
+    private final boolean authenticationEnabled = true;
+
+    @Autowired
     public PostController(PostService postService) {
         this.postService = postService;
     }
 
+    private boolean isAuthenticated(String token) {
+        if (!authenticationEnabled) return true;
+
+        if (token == null || token.isBlank()) return false;
+
+        ResponseEntity<?> response = userClient.validateToken(token);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() instanceof Map<?, ?> body) {
+            Object validObj = body.get("valid");
+            return validObj instanceof Boolean && (Boolean) validObj;
+        }
+
+        return false;
+    }
+
+
+
+
     @PostMapping
-    public ResponseEntity<?> createPost(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<?> createPost(@RequestBody PostRequest postRequest,
+                                        @RequestHeader(value = "Authorization", required = false) String token) {
+        if(!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+
+        }
         return ResponseEntity.ok(postService.addPost(postRequest));
     }
 
     @PostMapping("/dummy")
-    public void populateDummyPosts() {
+    public void populateDummyPosts( @RequestHeader(value = "Authorization", required = false) String token) {
+        if(!isAuthenticated(token)) {
+            return;
+        }
         postService.populateDummyPosts();
     }
 
     @GetMapping("/all")
-    public List<Post> getAllPosts() {
+    public List<Post> getAllPosts( @RequestHeader(value = "Authorization", required = false) String token ) {
+        if(!isAuthenticated(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
+        }
         return postService.getAllPosts();
     }
     @GetMapping("/{id}")
-    public Optional<Post> getPostById(@PathVariable UUID id) {
+    public Optional<Post> getPostById(@PathVariable UUID id, @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
+        }
         return postService.getPostById(id);
     }
     @PutMapping("/{id}")
-    public Post updatePost(@PathVariable UUID id, @RequestBody PostRequest updatedPost) {
+    public Post updatePost(@PathVariable UUID id, @RequestBody PostRequest updatedPost, @RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
+        }
         return postService.updatePost(id,updatedPost);
     }
 
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable UUID id) {
+    public void deletePost(@PathVariable UUID id,@RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
+        }
         Optional<Post> post = postService.getPostById(id);
         if (post.isPresent()) {
             postService.deletePostById(id);
@@ -62,28 +107,45 @@ public class PostController {
         postService.deleteAllPosts();
     }
 
+
+
     @PutMapping("/{userId}/like/{id}")
-    public Optional<Post> likePost(@PathVariable UUID id, @PathVariable UUID userId) {
+    public Optional<Post> likePost(@PathVariable UUID id, @PathVariable UUID userId,@RequestHeader(value = "Authorization", required = false) String token) {
+        if (!isAuthenticated(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
+        }
         Optional<Post> postOpt = postService.getPostById(id);
         return postOpt.flatMap(post -> postService.likePost(post, userId));
     }
 
     @PostMapping("/{userId}/sharedposts/{id}")
-    public ResponseEntity<?> sharePost(@PathVariable UUID userId,@PathVariable UUID id) {
+    public ResponseEntity<?> sharePost(@PathVariable UUID userId,@PathVariable UUID id,@RequestHeader(value = "Authorization", required = false) String token) {
+        if(!isAuthenticated(token)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
         return postService.sharePost(userId,id);
     }
     @PostMapping("/{userId}/friend/{friendId}")
-    public ResponseEntity<?> addFriend(@PathVariable UUID userId,@PathVariable UUID friendId) {
+    public ResponseEntity<?> addFriend(@PathVariable UUID userId,@PathVariable UUID friendId,@RequestHeader(value = "Authorization", required = false) String token) {
+        if(!isAuthenticated(token)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
         return postService.addFriend(userId,friendId);
     }
 
     @GetMapping("/{userId}/friends")
-    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId){
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId,@RequestHeader(value = "Authorization", required = false) String token){
+        if(!isAuthenticated(token)){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
+        }
         return postService.getFriends(userId);
     }
 
     @DeleteMapping("/{userId}/unfriend/{friendId}")
-    public ResponseEntity<?> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId){
+    public ResponseEntity<?> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId,@RequestHeader(value = "Authorization", required = false) String token){
+        if (!isAuthenticated(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
+        }
         return postService.removeFriend(userId,friendId);
 }
 }

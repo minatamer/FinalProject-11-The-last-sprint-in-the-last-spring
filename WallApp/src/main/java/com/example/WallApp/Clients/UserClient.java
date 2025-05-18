@@ -10,6 +10,9 @@ import java.util.UUID;
 @FeignClient(name = "user-service", url = "http://localhost:8080/user")
 public interface UserClient {
 
+//    AUTHENTICATION
+    @GetMapping("/validate-token/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token);
 
 //  FRIENDS
 
