@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searchapp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searchapp
+  template:
+    metadata:
+      labels:
+        app: searchapp
+    spec:
+      containers:
+        - name: searchapp
+          image: minatamer/searchapp:1.0
+          ports:
+            - containerPort: 8090
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://root:example@mongodb-service:27017/post?authSource=admin"

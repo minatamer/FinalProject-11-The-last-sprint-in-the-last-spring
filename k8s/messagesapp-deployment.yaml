@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messagesapp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: messagesapp
+  template:
+    metadata:
+      labels:
+        app: messagesapp
+    spec:
+      containers:
+        - name: messagesapp
+          image: minatamer/messagesapp:1.0
+          ports:
+            - containerPort: 8093
+          env:
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq
+            - name: SPRING_RABBITMQ_USERNAME
+              value: guest
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: guest
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://root:example@mongodb-service:27017/facebook_messaging?authSource=admin"

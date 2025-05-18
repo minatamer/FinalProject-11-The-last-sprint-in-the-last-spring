@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apigateway-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apigateway-service
+  template:
+    metadata:
+      labels:
+        app: apigateway-service
+    spec:
+      containers:
+        - name: apigateway-service
+          image: ziadhegazy99/apigateway
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: SPRING_MAIN_WEB_APPLICATION_TYPE
+              value: reactive
+
+            # 🧱 ROUTE 0: userapp
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
+              value: user-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+              value: http://userapp-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0
+              value: Path=/users/**
+
+            # 🧱 ROUTE 1: wallapp
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
+              value: wall-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+              value: http://wallapp-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
+              value: Path=/walls/**
+
+            # 🧱 ROUTE 2: searchapp
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
+              value: search-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+              value: http://searchapp-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
+              value: Path=/search/**
+
+            # 🧱 ROUTE 3: messagesapp
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_3_ID
+              value: messages-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_3_URI
+              value: http://messagesapp-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0
+              value: Path=/messages/**
+          
