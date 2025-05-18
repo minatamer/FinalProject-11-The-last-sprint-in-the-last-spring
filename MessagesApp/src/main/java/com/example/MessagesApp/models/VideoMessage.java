@@ -3,11 +3,12 @@ package com.example.MessagesApp.models;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Document(collection = "messages")
 public class VideoMessage extends Message {
     private String videoUrl;
-    private int duration;
+    private long duration;
     private long size;
 
     @Override
@@ -23,15 +24,15 @@ public class VideoMessage extends Message {
         return "[Video] " + getVideoUrl();
     }
 
-    public VideoMessage(String id, String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String videoUrl, int duration, long size) {
-        super(id, chatId, senderId, receiverId, content, timestamp, status);
+    public VideoMessage(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String videoUrl, long duration, long size) {
+        super(id, chatId, senderId, timestamp, status);
         this.videoUrl = videoUrl;
         this.duration = duration;
         this.size = size;
     }
 
-    public VideoMessage(String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String videoUrl, int duration, long size) {
-        super(chatId, senderId, receiverId, content, timestamp, status);
+    public VideoMessage(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String videoUrl, long duration, long size) {
+        super(chatId, senderId, timestamp, status);
         this.videoUrl = videoUrl;
         this.duration = duration;
         this.size = size;
@@ -45,11 +46,11 @@ public class VideoMessage extends Message {
         this.videoUrl = videoUrl;
     }
 
-    public int getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
     }
 

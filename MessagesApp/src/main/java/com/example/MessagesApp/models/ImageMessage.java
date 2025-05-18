@@ -3,6 +3,7 @@ package com.example.MessagesApp.models;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Document(collection = "messages")
 public class ImageMessage extends Message {
@@ -12,14 +13,14 @@ public class ImageMessage extends Message {
     public ImageMessage() {
     }
 
-    public ImageMessage(String id, String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
-        super(id, chatId, senderId, receiverId, content, timestamp, status);
+    public ImageMessage(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
+        super(id, chatId, senderId, timestamp, status);
         this.caption = caption;
         this.imageUrl = imageUrl;
     }
 
-    public ImageMessage(String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
-        super(chatId, senderId, receiverId, content, timestamp, status);
+    public ImageMessage(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
+        super(chatId, senderId, timestamp, status);
         this.caption = caption;
         this.imageUrl = imageUrl;
     }

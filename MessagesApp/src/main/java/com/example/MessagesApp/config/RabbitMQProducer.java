@@ -4,19 +4,21 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class RabbitMQProducer {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void sendToUser(String message, String userId) {
+    public void sendToUser(UUID messageID, UUID userId) {
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.MESSAGE_ROUTING_KEY,
-                message
+                messageID
         );
-        System.out.println("Message: " + message + "is sent from user: " + userId);
+        System.out.println("Message with ID: " + messageID + "is sent from user: " + userId);
     }
 }
 

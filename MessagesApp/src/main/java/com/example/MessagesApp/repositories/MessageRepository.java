@@ -2,11 +2,13 @@ package com.example.MessagesApp.repositories;
 import com.example.MessagesApp.models.MessageStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import com.example.MessagesApp.models.Message;
-import java.util.List;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.UUID;
+
+@Repository
 public interface MessageRepository extends MongoRepository<Message, String> {
-    List<Message> findByChatIdOrderByTimestampAsc(String chatId);
-    List<Message> findByChatIdAndStatus(String chatId, MessageStatus status);
-    List<Message> findByChatIdAndSenderId(String chatId, String senderId);
-    List<Message> findUnseenMessages(String chatId, String userId);
+    List<Message> findByChatIdOrderByTimestampAsc(UUID chatId);
+    List<Message> findByChatIdAndStatus(UUID chatId, MessageStatus status);
 }

@@ -4,36 +4,31 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Document(collection = "messages")
 public abstract class Message {
     @Id
-    private String id;
-    private String chatId;
-    private String senderId;
-    private String receiverId;
-    private String content;
+    private UUID id;
+    private UUID chatId;
+    private UUID senderId;
     private LocalDateTime timestamp;
     private MessageStatus status;
 
     public Message() {
     }
 
-    public Message(String id, String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status) {
+    public Message(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status) {
         this.id = id;
         this.chatId = chatId;
         this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.content = content;
         this.timestamp = timestamp;
         this.status = status;
     }
 
-    public Message(String chatId, String senderId, String receiverId, String content, LocalDateTime timestamp, MessageStatus status) {
+    public Message(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status) {
         this.chatId = chatId;
         this.senderId = senderId;
-        this.receiverId = receiverId;
-        this.content = content;
         this.timestamp = timestamp;
         this.status = status;
     }
@@ -42,22 +37,16 @@ public abstract class Message {
 
     public abstract String getType();
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public String getChatId() {
+    public UUID getChatId() {
         return chatId;
     }
 
-    public String getSenderId() {
+    public UUID getSenderId() {
         return senderId;
-    }
-
-    public String getReceiverId() {return receiverId;}
-
-    public String getContent() {
-        return content;
     }
 
     public LocalDateTime getTimestamp() {
@@ -68,22 +57,16 @@ public abstract class Message {
         return status;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public void setChatId(String chatId) {
+    public void setChatId(UUID chatId) {
         this.chatId = chatId;
     }
 
-    public void setSenderId(String senderId) {
+    public void setSenderId(UUID senderId) {
         this.senderId = senderId;
-    }
-
-    public void setReceiverId(String receiverId) {this.receiverId = receiverId;}
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public void setTimestamp(LocalDateTime timestamp) {

@@ -6,13 +6,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Document(collection = "chats")
 public class Chat {
     @Id
-    private String id;
+    private UUID id;
     private String name;
-    private List<String> participantIds;
+    private List<UUID> participantIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean pinned;
@@ -23,7 +24,7 @@ public class Chat {
     public Chat() {
     }
 
-    public Chat(String id, String name, List<String> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
+    public Chat(UUID id, String name, List<UUID> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
         this.id = id;
         this.name = name;
         this.participantIds = participantIds;
@@ -34,7 +35,7 @@ public class Chat {
         this.groupChat = groupChat;
     }
 
-    public Chat(String name, List<String> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
+    public Chat(String name, List<UUID> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
         this.name = name;
         this.participantIds = participantIds;
         this.createdAt = createdAt;
@@ -44,11 +45,11 @@ public class Chat {
         this.groupChat = groupChat;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -60,11 +61,11 @@ public class Chat {
         this.name = name;
     }
 
-    public List<String> getParticipantIds() {
+    public List<UUID> getParticipantIds() {
         return participantIds;
     }
 
-    public void setParticipantIds(List<String> participantIds) {
+    public void setParticipantIds(List<UUID> participantIds) {
         this.participantIds = participantIds;
     }
 
