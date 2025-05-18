@@ -14,23 +14,28 @@ public abstract class Message {
     private UUID senderId;
     private LocalDateTime timestamp;
     private MessageStatus status;
+    private String content;
 
     public Message() {
+        this.id = UUID.randomUUID();
     }
 
-    public Message(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status) {
+    public Message(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String content) {
         this.id = id;
         this.chatId = chatId;
         this.senderId = senderId;
         this.timestamp = timestamp;
         this.status = status;
+        this.content = content;
     }
 
-    public Message(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status) {
+    public Message(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String content) {
+        this.id = UUID.randomUUID();
         this.chatId = chatId;
         this.senderId = senderId;
         this.timestamp = timestamp;
         this.status = status;
+        this.content = content;
     }
 
     public abstract String getContentPreview();
@@ -76,4 +81,8 @@ public abstract class Message {
     public void setStatus(MessageStatus status) {
         this.status = status;
     }
+
+    public String getContent() {return this.content;}
+
+    public void setContent(String content) {this.content = content;}
 }

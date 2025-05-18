@@ -5,8 +5,11 @@ import com.example.MessagesApp.services.ChatService;
 import com.example.MessagesApp.services.DatabasePopulationService;
 import com.example.MessagesApp.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -17,9 +20,10 @@ public class MessageController {
     DatabasePopulationService databasePopulationService;
 
     @Autowired
-    public MessageController(MessageService messageService, ChatService chatService) {
+    public MessageController(MessageService messageService, ChatService chatService, DatabasePopulationService databasePopulationService) {
         this.messageService = messageService;
         this.chatService = chatService;
+        this.databasePopulationService = databasePopulationService;
     }
 
     @PostMapping("/populateRandomMessages")
@@ -37,19 +41,32 @@ public class MessageController {
         databasePopulationService.createDummyData();
     }
 
-    @GetMapping
+    @GetMapping("/getAllMessages")
     public List<Message> getAllMessages() {
         return messageService.getAllMessages();
     }
 
-    @PostMapping("/chat/createChat")
-    public Chat createChat(@RequestParam String name, @RequestBody List<UUID> participantIds) {
-        return chatService.createChat(participantIds, name);
+    @GetMapping("/getAllChats")
+    public List<Chat> getAllChats() {
+        return chatService.getAllChats();
     }
 
-    @PostMapping("/chat/addUser")
-    public Chat addParticipant(@RequestBody UUID chatId, @RequestBody UUID userId) {
+    @PostMapping("/chat/createChat")
+    public Chat createChat(@RequestBody Chat body) {
+        return chatService.createChat(body.getName(), body.getParticipantIds());
+    }
+
+    @PutMapping("/chat/addUser/{chatId}/{userId}")
+    public Chat addParticipant(@PathVariable UUID chatId, @PathVariable UUID userId) {
         return chatService.addParticipant(chatId, userId);
+    }
+
+    @PutMapping("/chat/removeParticipant/{chatId}/{userId}")
+    public ResponseEntity<Chat> removeParticipant(
+            @PathVariable UUID chatId,
+            @PathVariable UUID userId) {
+        Chat updatedChat = chatService.removeParticipant(chatId, userId);
+        return ResponseEntity.ok(updatedChat);
     }
 
     @GetMapping("/chat/user/{userId}")
@@ -57,39 +74,63 @@ public class MessageController {
         return chatService.getUserChats(userId);
     }
 
-    @PostMapping("/send")
-    public Message sendMessage(
-            @RequestParam UUID chatId,
-            @RequestParam UUID senderId,
-            @RequestParam String content,
-            @RequestParam String messageType) {
-        return messageService.sendMessage(chatId, senderId, content, messageType);
+    @PostMapping("/send/{chatId}/{senderId}/{type}")
+    public Message sendMessage(@PathVariable UUID chatId, @PathVariable UUID senderId, @RequestBody Map<String, Object> content, @PathVariable String type) {
+        return messageService.sendMessage(
+                chatId,
+                senderId,
+                (String) content.get("content"),
+                type);
     }
 
-    @GetMapping("/chat/{chatId}")
+    @GetMapping("/chat/openChat/{chatId}")
     public List<Message> getChatMessages(@PathVariable UUID chatId) {
         return messageService.getChatMessages(chatId);
     }
 
-    @PutMapping("/seen/{chatId}/{userId}")
-    public void markMessagesAsSeen(@PathVariable UUID chatId, @PathVariable UUID userId) {
-        messageService.markMessagesAsSeen(chatId, userId);
+    @PutMapping("/seeChat/{chatId}/{userId}")
+    public List<Message> markMessagesAsSeen(@PathVariable UUID chatId, @PathVariable UUID userId) {
+        return messageService.markMessagesAsSeen(chatId, userId);
     }
 
     @PutMapping("/chat/pin/{chatId}")
-    public void pinChat(@PathVariable UUID chatId) {
-        chatService.pinChat(chatId);
+    public Chat pinChat(@PathVariable UUID chatId) {
+        return chatService.pinChat(chatId);
     }
 
     @PutMapping("/chat/unpin/{chatId}")
-    public void unpinChat(@PathVariable UUID chatId) {
-        chatService.unpinChat(chatId);
+    public Chat unpinChat(@PathVariable UUID chatId) {
+        return chatService.unpinChat(chatId);
     }
 
-    @PutMapping("/status/{messageId}")
+    @PutMapping("/changeStatus/{messageId}/{status}")
     public Message updateMessageStatus(
             @PathVariable UUID messageId,
-            @RequestParam MessageStatus status) {
+            @PathVariable MessageStatus status) {
         return messageService.updateMessageStatus(messageId, status);
+    }
+
+    @DeleteMapping("/deleteChat/{chatId}")
+    public Optional<Chat> deleteChat(@PathVariable UUID chatId) {
+        return chatService.deleteChat(chatId);
+    }
+
+    @DeleteMapping("/deleteMessage/{messageId}")
+    public Optional<Message> deleteMessage(@PathVariable UUID messageId) {
+        return messageService.deleteMessage(messageId);
+    }
+
+    @PutMapping("/chat/updateName/{chatId}")
+    public Chat updateChat(
+            @PathVariable UUID chatId,
+            @RequestBody Map<String, Object> message) {
+        return chatService.updateChat(chatId, (String) message.get("newName"));
+    }
+
+    @PutMapping("/editMessage/{messageId}")
+    public Message editTextMessage(
+            @PathVariable UUID messageId,
+            @RequestBody Map<String, Object> message) {
+        return messageService.editTextMessage(messageId, (String) message.get("newContent"));
     }
 }

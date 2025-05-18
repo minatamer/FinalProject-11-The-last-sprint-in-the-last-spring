@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -41,7 +42,12 @@ public class MessageService {
     }
 
     public Message sendMessage(UUID chatId, UUID senderId, String content, String messageType) {
-        Chat chat = chatRepository.findById(String.valueOf(chatId))
+        System.out.println("ChatId: " + chatId);
+        System.out.println("SenderId: " + senderId);
+        System.out.println("Content: " + content);
+        System.out.println("MessageType: " + messageType);
+
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
         if(!Boolean.TRUE.equals(userClient.userExists(senderId).getBody())){
@@ -58,6 +64,17 @@ public class MessageService {
         message.setTimestamp(LocalDateTime.now());
         message.setStatus(MessageStatus.SENT);
 
+        if(message instanceof TextMessage) {
+            ((TextMessage) message).setTextContent(content);
+        } else if (message instanceof ImageMessage) {
+            ((ImageMessage) message).setImageUrl(content);
+            ((ImageMessage) message).setCaption(content.toLowerCase());
+        } else if (message instanceof VideoMessage) {
+            ((VideoMessage) message).setVideoUrl(content);
+            ((VideoMessage) message).setSize(content.length());
+            ((VideoMessage) message).setDuration(content.length());
+        }
+
         Message savedMessage = messageRepository.save(message);
 
         // Update chat's last updated time
@@ -72,14 +89,14 @@ public class MessageService {
     }
 
     public List<Message> getChatMessages(UUID chatId) {
-        Chat chat = chatRepository.findById(String.valueOf(chatId))
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
         return messageRepository.findByChatIdOrderByTimestampAsc(chatId);
     }
 
-    public void markMessagesAsSeen(UUID chatId, UUID userId) {
-        Chat chat = chatRepository.findById(String.valueOf(chatId))
+    public List<Message> markMessagesAsSeen(UUID chatId, UUID userId) {
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
         if(!Boolean.TRUE.equals(userClient.userExists(userId).getBody())){
@@ -94,10 +111,12 @@ public class MessageService {
                 messageNotifier.notifyObservers(message);
             }
         });
+        chatRepository.save(chat);
+        return messageRepository.findByChatIdOrderByTimestampAsc(chatId);
     }
 
     public Message updateMessageStatus(UUID messageId, MessageStatus status) {
-        Message message = messageRepository.findById(String.valueOf(messageId))
+        Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
         message.setStatus(status);
         Message updatedMessage = messageRepository.save(message);
@@ -107,10 +126,32 @@ public class MessageService {
 
     @RabbitListener(queues = RabbitMQConfig.MESSAGE_QUEUE)
     public void notifyUser(UUID messageId) {
-        Message message = messageRepository.findById(String.valueOf(messageId))
+        Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
 
         System.out.println("Received message with id: " + messageId + " from userId: " + message.getSenderId() + " to list of users: ");
+    }
+
+    public Optional<Message> deleteMessage(UUID messageId){
+        if (!messageRepository.existsById(messageId)) {
+            throw new IllegalArgumentException("Message with ID " + messageId + " does not exist");
+        }
+        Optional<Message> deletedMessage = messageRepository.findById(messageId);
+        messageRepository.deleteById(messageId);
+        return deletedMessage;
+    }
+
+    public Message editTextMessage(UUID messageId, String newContent) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message with ID " + messageId + " does not exist"));
+
+        // Check if it's a TextMessage and update content
+        if (message instanceof TextMessage textMessage) {
+            textMessage.setTextContent(newContent);
+            return messageRepository.save(textMessage);
+        } else {
+            throw new IllegalArgumentException("Message with ID " + messageId + " is not a text message");
+        }
     }
 }

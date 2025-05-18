@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ChatService {
     ChatRepository chatRepository;
     UserClient userClient;
-//    private final UserServiceClient userServiceClient; // Feign client for user validation
 
     @Autowired
     public ChatService(ChatRepository chatRepository, UserClient userClient) {
@@ -25,7 +25,7 @@ public class ChatService {
     }
 
     // Create a new chat (single or group)
-    public Chat createChat(List<UUID> participantIds, String chatName) {
+    public Chat createChat(String chatName, List<UUID> participantIds) {
         // Validate participants exist
         participantIds.forEach(userId -> {
             if(!Boolean.TRUE.equals(userClient.userExists(userId).getBody())){
@@ -50,13 +50,12 @@ public class ChatService {
         chat.setName(chatName);
         chat.setGroupChat(participantIds.size() > 2);
         chat.setCreatedAt(LocalDateTime.now());
-
         return chatRepository.save(chat);
     }
 
     // Add participant to group chat
     public Chat addParticipant(UUID chatId, UUID userId){
-        Chat chat = chatRepository.findById(String.valueOf(chatId))
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 
         if (!chat.isGroupChat()) {
@@ -67,11 +66,31 @@ public class ChatService {
             throw new IllegalArgumentException("User with id " + userId + " does not exist.");
         }
 
-        if (chat.getParticipantIds().contains(userId)) {
+        if (chat.getParticipantIds() != null && chat.getParticipantIds().contains(userId)) {
             throw new IllegalArgumentException("User already in chat");
         }
 
-        chat.getParticipantIds().add(userId);
+        if(chat.getParticipantIds() == null){
+            chat.setParticipantIds(List.of(userId));
+        }
+        else{
+            chat.getParticipantIds().add(userId);
+        }
+        return chatRepository.save(chat);
+    }
+
+    public Chat removeParticipant(UUID chatId, UUID userIdToRemove) {
+        // Find the chat or throw an exception if it doesn't exist
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat not found with ID: " + chatId));
+
+        List<UUID> participants = chat.getParticipantIds();
+        if (!participants.contains(userIdToRemove)) {
+            throw new IllegalArgumentException("User " + userIdToRemove + " is not in this chat");
+        }
+
+        participants.remove(userIdToRemove);
+        chat.setParticipantIds(participants);
         return chatRepository.save(chat);
     }
 
@@ -84,26 +103,52 @@ public class ChatService {
     }
 
     public Chat pinChat(UUID chatId) {
-        Chat chat = chatRepository.findById(String.valueOf(chatId))
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 
         if (chat.isPinned()) {
             throw new IllegalArgumentException("Chat is already pinned");
         }
 
-        chat.setGroupChat(true);
+        chat.setPinned(true);
         return chatRepository.save(chat);
     }
 
     public Chat unpinChat(UUID chatId) {
-        Chat chat = chatRepository.findById(String.valueOf(chatId))
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 
         if (!chat.isPinned()) {
             throw new IllegalArgumentException("Chat is already not pinned");
         }
 
-        chat.setGroupChat(false);
+        chat.setPinned(false);
         return chatRepository.save(chat);
     }
+
+    public List<Chat> getAllChats() {
+        return chatRepository.findAll();
+    }
+
+    public Optional<Chat> deleteChat(UUID chatId){
+        if (!chatRepository.existsById(chatId)) {
+            throw new IllegalArgumentException("Chat with ID " + chatId + " does not exist");
+        }
+        Optional<Chat> deletedChat = chatRepository.findById(chatId);
+        chatRepository.deleteById(chatId);
+        return deletedChat;
+    }
+
+    public Chat updateChat(UUID chatId, String newName) {
+        return chatRepository.findById(chatId)
+                .map(chat -> {
+                    chat.setName(newName);
+                    return chatRepository.save(chat);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Chat with ID " + chatId + " not found"));
+    }
+
+
+
+
 }

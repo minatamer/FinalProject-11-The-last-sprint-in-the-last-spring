@@ -20,14 +20,6 @@ public class MessagesAppApplication {
 		SpringApplication.run(MessagesAppApplication.class, args);
 	}
 
-	@Bean
-	public CommandLineRunner testRepo(ChatRepository repo) {
-		return args -> {
-			System.out.println("ChatRepository bean is injected successfully: " + repo);
-		};
-	}
-
-
 //	@Bean
 //	public MessageNotifier messageNotifier(MessageStatusObserver statusObserver) {
 //		MessageNotifier notifier = new MessageNotifier();

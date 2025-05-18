@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface MessageRepository extends MongoRepository<Message, String> {
+public interface MessageRepository extends MongoRepository<Message, UUID> {
     List<Message> findByChatIdOrderByTimestampAsc(UUID chatId);
     List<Message> findByChatIdAndStatus(UUID chatId, MessageStatus status);
+
 }

@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ChatRepository extends MongoRepository<Chat, String> {
+public interface ChatRepository extends MongoRepository<Chat, UUID> {
     List<Chat> findByParticipantIdsContaining(UUID userId);
     Optional<Chat> findByParticipantIdsAndGroupChat(List<UUID> participantIds, boolean groupChat);
 }
