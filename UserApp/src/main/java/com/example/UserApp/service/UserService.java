@@ -42,6 +42,7 @@ public class UserService {
     private MailService mailService;
     @CachePut(value = "user_cache", key = "#result.id")
     public User saveUser(User user) {
+        user.setId(UUID.randomUUID());
         return userRepository.save(user);
     }
 
@@ -77,7 +78,7 @@ public class UserService {
         }
     }
     @CachePut(value = "user_cache", key = "#userId")
-    public String updateUser(String username, String email, int age, String phoneNumber, String gender, UUID userId, boolean isTwoFactorEnabled) {
+    public String updateUser(String username, String password, String email, int age, String phoneNumber, String gender, UUID userId, boolean isTwoFactorEnabled) {
         try {
             // Fetch the current user from the database
             User user = userRepository.findById(userId)
@@ -98,6 +99,9 @@ public class UserService {
             }
             if (gender != null) {
                 user.setGender(gender);
+            }
+            if (password != null) {
+                user.setPassword(password);
             }
             if (isTwoFactorEnabled != false) {
                 user.setTwoFactorEnabled(isTwoFactorEnabled);

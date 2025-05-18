@@ -10,6 +10,7 @@ public class User {
     @Id
 //    @GeneratedValue(strategy = GenerationType.AUTO)
 //    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
     private String username;

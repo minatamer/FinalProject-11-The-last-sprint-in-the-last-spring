@@ -100,6 +100,7 @@ public class UserController {
 
         String result = userService.updateUser(
                 user.getUsername(),
+                user.getPassword(),
                 user.getEmail(),
                 user.getAge(),
                 user.getPhoneNumber(),
