@@ -16,13 +16,24 @@ spec:
         - name: messagesapp
           image: minatamer/messagesapp:1.0
           ports:
-            - containerPort: 8093
+            - containerPort: 8080
           env:
+            # RabbitMQ
             - name: SPRING_RABBITMQ_HOST
-              value: rabbitmq
+              value: "rabbitmq"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
             - name: SPRING_RABBITMQ_USERNAME
-              value: guest
+              value: "guest"
             - name: SPRING_RABBITMQ_PASSWORD
-              value: guest
+              value: "guest"
+            - name: SPRING_DATA_MONGODB_HOST
+              value: "mongodb-service"
+            - name: SPRING_DATA_MONGODB_PORT
+              value: "27017"
+            - name: SPRING_DATA_MONGODB_DATABASE
+              value: "facebook_messaging"
             - name: SPRING_DATA_MONGODB_URI
               value: "mongodb://root:example@mongodb-service:27017/facebook_messaging?authSource=admin"
+            - name: SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED
+              value: "false"
