@@ -9,13 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import java.util.UUID;
-import com.example.WallApp.model.Subject;
-import com.example.WallApp.model.Observer;
-
-@Data
 
 @Document(collection = "post")
-public class Post implements Subject {
+public class Post{
 
     @Id
     private UUID id ;
@@ -28,48 +24,27 @@ public class Post implements Subject {
     private List<UUID> likedBy ;
     private List<UUID> sharedBy ;
     private LocalDateTime createdAt ;
-    private List<Observer> observers = new ArrayList<>();
 
-    public Post(){
-        this.observers = new ArrayList<>();
-    }
+
+
     private Post(PostBuilder builder) {
-        this.id = UUID.randomUUID();
+        this.id = builder.id != null ? builder.id : UUID.randomUUID();
         this.userId = builder.userId;
         this.textContent = builder.textContent;
         this.imageUrl = builder.imageUrl;
         this.likedBy = new ArrayList<>();
         this.sharedBy = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
-        this.observers = new ArrayList<>();
     }
 
-    @Override
-    public void registerObserver(Observer observer) {
-        observers.add(observer);
+    public static PostBuilder builder() {
+        return new PostBuilder();
     }
 
-    @Override
-    public void removeObserver(Observer observer) {
-        observers.remove(observer);
+    public Post() {
+        // Default constructor required by MongoDB
     }
 
-    @Override
-    public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update(textContent, imageUrl);
-        }
-    }
-
-    public void updateObserved(String newText, String newImageUrl) {
-        this.textContent = newText;
-        this.imageUrl = newImageUrl;
-        observedChanged();
-    }
-
-    public void observedChanged() {
-        notifyObservers();
-    }
 
     public UUID getId() {
         return id;
@@ -85,7 +60,6 @@ public class Post implements Subject {
 
     public void setTextContent(String textContent) {
         this.textContent = textContent;
-        notifyObservers();
     }
 
     public String getImageUrl() {
@@ -94,7 +68,6 @@ public class Post implements Subject {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
-        notifyObservers();
     }
 
     public List<UUID> getLikedBy() {
@@ -110,6 +83,14 @@ public class Post implements Subject {
     }
     public void setSharedBy(List<UUID> sharedBy) {
         this.sharedBy = sharedBy;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
     public LocalDateTime getCreatedAt() {

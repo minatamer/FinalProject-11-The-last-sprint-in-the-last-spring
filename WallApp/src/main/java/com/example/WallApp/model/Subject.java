@@ -1,10 +1,10 @@
 package com.example.WallApp.model;
 
-import com.example.WallApp.model.Observer;
+import java.util.UUID;
 
 public interface Subject{
     void registerObserver(Observer o);
     void removeObserver(Observer o);
-    void notifyObservers();
+    void notifyObservers(UUID receiverId, String message);
 }
 

@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequestMapping("/wallApp/posts")
 public class PostController {
 
+    @Autowired
     private final PostService postService;
 
     @Autowired
@@ -61,11 +62,8 @@ public class PostController {
     }
 
     @PostMapping("/dummy")
-    public void populateDummyPosts( @RequestHeader(value = "Authorization", required = false) String token) {
-        if(!isAuthenticated(token)) {
-            return;
-        }
-        postService.populateDummyPosts();
+    public ResponseEntity<?> populateDummyPosts( @RequestHeader(value = "Authorization", required = false) String token) {
+        return postService.populateDummyPosts();
     }
 
     @GetMapping("/all")
@@ -75,6 +73,27 @@ public class PostController {
         }
         return postService.getAllPosts();
     }
+
+    @GetMapping("/{userId}/myposts")
+    public ResponseEntity<?> getMyPosts(@PathVariable UUID userId,
+                                        @RequestHeader(value = "Authorization", required = false) String token) {
+
+        // Verify authentication if needed
+        if (authenticationEnabled && !isAuthenticated(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Login Token.");
+        }
+
+        // Fetch the posts
+        List<Post> posts = postService.getMyPosts(userId);
+
+        // Return the list of posts
+        return ResponseEntity.ok(posts);
+    }
+
+
+
+
+
     @GetMapping("/{id}")
     public Optional<Post> getPostById(@PathVariable UUID id, @RequestHeader(value = "Authorization", required = false) String token) {
         if (!isAuthenticated(token)) {
@@ -118,7 +137,7 @@ public class PostController {
         return postOpt.flatMap(post -> postService.likePost(post, userId));
     }
 
-    @PostMapping("/{userId}/sharedposts/{id}")
+    @PostMapping("/{userId}/sharepost/{id}")
     public ResponseEntity<?> sharePost(@PathVariable UUID userId,@PathVariable UUID id,@RequestHeader(value = "Authorization", required = false) String token) {
         if(!isAuthenticated(token)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
@@ -130,6 +149,7 @@ public class PostController {
         if(!isAuthenticated(token)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
         }
+        //
         return postService.addFriend(userId,friendId);
     }
 

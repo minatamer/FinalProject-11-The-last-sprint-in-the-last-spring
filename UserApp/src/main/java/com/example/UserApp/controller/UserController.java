@@ -285,6 +285,20 @@ public class UserController {
         return ResponseEntity.ok(Map.of("valid", valid));
     }
 
+    @GetMapping("/{userId}/token")
+    public ResponseEntity<?> getUserToken(@PathVariable UUID userId) {
+
+        String userToken = userService.getToken(userId);
+        if (userToken != null) {
+            return ResponseEntity.ok(Map.of("token", userToken));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token not found for the specified user.");
+        }
+    }
+    
+    
+    
+
 
 
 

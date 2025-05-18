@@ -1,6 +1,9 @@
 package com.example.WallApp.model;
 
+import java.util.UUID;
+
 public interface Observer {
-    void update(String textContent, String imageUrl);
+    void update(UUID receiverId, String message);
 }
+
 

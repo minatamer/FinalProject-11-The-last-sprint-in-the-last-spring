@@ -180,7 +180,13 @@ public class UserService {
         int otp = 100000 + random.nextInt(900000); // Generates a 6-digit number
         return String.valueOf(otp);
     }
-
+    public String getToken(UUID userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            return userOpt.get().getToken();
+        }
+        return null;
+    }
 
     public boolean logout(String token) {
         Optional<User> userOpt = userRepository.findByToken(token);
@@ -239,11 +245,14 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
 
         if (!friendRepository.existsByUserAndFriend(user, friend)) {
+            // Bidirectional friendship
             Friend newFriend = new Friend(null, user, friend);
+            Friend newFriend2 = new Friend(null, friend, user);
             friendRepository.save(newFriend);
+            friendRepository.save(newFriend2);
         }
         Map<String,String> body = Map.of(
-                "message",friendId+" has been added to the followed users of "+ userId
+                "message",friendId+ " and " + userId + " are friends now."
         );
         return  ResponseEntity.ok().body(body);
     }

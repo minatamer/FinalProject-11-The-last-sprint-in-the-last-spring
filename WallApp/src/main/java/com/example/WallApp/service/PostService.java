@@ -2,35 +2,43 @@ package com.example.WallApp.service;
 
 import com.example.WallApp.Clients.UserClient;
 import com.example.WallApp.dto.PostRequest;
+import com.example.WallApp.model.Observer;
 import com.example.WallApp.model.Post;
+import com.example.WallApp.model.Subject;
 import com.example.WallApp.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-public class PostService {
+public class PostService implements Subject {
 
+    // List of observers (users who observe posts)
+    private final List<Observer> observers = new ArrayList<>();
+
+
+    @Autowired
     PostRepository postRepository;
 
     @Autowired
     UserClient userClient;
 
     @Autowired
-    public PostService(PostRepository postRepository) {
+    private NotificationService notificationService; // observer
+
+    @Autowired
+    public PostService(PostRepository postRepository, NotificationService notificationService, UserClient userClient) {
+        this.notificationService = notificationService;
+        this.userClient = userClient;
         this.postRepository = postRepository;
     }
 
     @Transactional
-    public void populateDummyPosts(){
+    public ResponseEntity<List<Post>> populateDummyPosts(){
 
         Post postSalah = new Post.PostBuilder()
                 .Id(UUID.fromString("44444444-4444-4444-4444-444444444444"))
@@ -56,7 +64,10 @@ public class PostService {
                 .build();
         postRepository.save(post3amoora);
 
+        return ResponseEntity.ok(postRepository.findAll());
+
     }
+
     public Post addPost(PostRequest postRequest) {
         // Validate the post content
         if ((postRequest.getTextContent() == null || postRequest.getTextContent().isBlank()) &&
@@ -71,34 +82,59 @@ public class PostService {
                 .ImageUrl(postRequest.getImageUrl())
                 .build();
 
-        postRepository.save(post);
-        return post ;
+        return postRepository.save(post);
     }
 
     public Optional<Post> getPostById(UUID id) {
         return postRepository.findById(id);
     }
 
-    public Post updatePost(UUID id,PostRequest postreq) {
-        Optional<Post> optionalPost = postRepository.findById(id);
-        if (optionalPost.isPresent()) {
-            Post retrievedPost = optionalPost.get();
+    public List<Post> getMyPosts(UUID userId) {
+        // 1. Get the user's friends
+        ResponseEntity<List<UUID>> friendsResponse = userClient.getFriends(userId);
 
-            if ((postreq.getTextContent() == null || postreq.getTextContent().isBlank()) &&
-                    (postreq.getImageUrl() == null || postreq.getImageUrl().isBlank())
-                    ||(postreq.getTextContent() == null && retrievedPost.getTextContent() != null && postreq.getImageUrl() == null && retrievedPost.getImageUrl() == null)
-                    ||(postreq.getTextContent() == null && retrievedPost.getTextContent() == null && postreq.getImageUrl() == null && retrievedPost.getImageUrl() != null)) {
-                throw new IllegalArgumentException("Post cannot be empty. Please provide either text content or an image URL.");
-            }
+        if (friendsResponse.getStatusCode().is2xxSuccessful() && friendsResponse.getBody() != null) {
+            List<UUID> friends = friendsResponse.getBody();
 
-            retrievedPost.setTextContent(postreq.getTextContent());
-            retrievedPost.setImageUrl(postreq.getImageUrl());
-
-            // Save and return the updated post
-            return postRepository.save(retrievedPost);
+            // 2. Query posts by friends (created or shared)
+            return postRepository.findByUserIdInOrSharedByIn(friends, friends);
+        } else {
+            // If no friends found or error, return an empty list
+            return new ArrayList<>();
         }
-        return null;
     }
+
+
+    public Post updatePost(UUID id, PostRequest postReq) {
+        // Retrieve the existing post
+        Optional<Post> optionalPost = postRepository.findById(id);
+        if (optionalPost.isEmpty()) {
+            throw new IllegalArgumentException("Post with id " + id + " not found");
+        }
+
+        Post existingPost = optionalPost.get();
+
+        // Merge the request data into the existing post
+        if (postReq.getTextContent() != null) {
+            existingPost.setTextContent(postReq.getTextContent());
+        }
+        if (postReq.getImageUrl() != null) {
+            existingPost.setImageUrl(postReq.getImageUrl());
+        }
+
+        // Validation to ensure no field is null
+        validatePost(existingPost);
+
+        // Save the updated post
+        return postRepository.save(existingPost);
+    }
+
+    private void validatePost(Post post) {
+        if (post.getTextContent() == null && post.getImageUrl() == null) {
+            throw new IllegalArgumentException("Post cannot have null fields");
+        }
+    }
+
 
     public void deletePostById(UUID id) {
         postRepository.deleteById(id);
@@ -110,6 +146,12 @@ public class PostService {
     public Optional<Post> likePost(Post post, UUID userId) {
         if (!post.getLikedBy().contains(userId)) {
             post.getLikedBy().add(userId);
+
+            // Notify post owner of the like
+            String message = "User with ID " + userId + " liked your post.";
+            notifyObservers(post.getUserId(), message);
+
+
             return Optional.of(postRepository.save(post));
         }
         return Optional.of(post);
@@ -124,39 +166,67 @@ public class PostService {
 
 
     public ResponseEntity<?> addFriend(UUID userId, UUID friendId) {
+        // Register the friend as an observer
+        registerObserver(notificationService);
+
         return userClient.addFriend(userId, friendId);
     }
 
     public ResponseEntity<?> removeFriend(UUID userId, UUID friendId) {
+        // Unregister the friend as an observer
+        removeObserver(notificationService);
+
         return userClient.removeFriend(userId, friendId);
     }
 
     public ResponseEntity<?> sharePost(UUID userId, UUID postId) {
-        if(!postRepository.existsById(postId)) {
-            throw new IllegalArgumentException("Post with id " + postId + " does not exist.");
-        }
-        if(!Boolean.TRUE.equals(userClient.checkUser(userId).getBody())){
-            throw new IllegalArgumentException("User with id " + userId + " does not exist.");
-        }
-        Post post = postRepository.findById(postId).get();
-        if(!post.getSharedBy().contains(userId)) {
-            List<UUID> peopleWhoShared = post.getSharedBy();
-            peopleWhoShared.add(userId);
-            post.setSharedBy(peopleWhoShared);
-            postRepository.save(post);
-            Map<String,String> body = Map.of(
-                    "message","Post "+postId+ " has been shared by "+userId
-            );
-            return ResponseEntity.ok(body);
+        Optional<Post> postOptional = postRepository.findById(postId);
 
+        if (postOptional.isPresent()) {
+            Post post = postOptional.get();
+            List<UUID> shares = post.getSharedBy();
 
+            if (!shares.contains(userId)) {
+                shares.add(userId); // Add to shared list
+                post.setSharedBy(shares);
+                postRepository.save(post);
+
+                // Notify post owner about the share
+                String message = "User with ID " + userId + " shared your post.";
+                notifyObservers(post.getUserId(), message);
+
+                return ResponseEntity.ok("Post shared successfully.");
+            } else {
+                return ResponseEntity.badRequest().body("You already shared this post.");
+            }
+        } else {
+            return ResponseEntity.badRequest().body("Post not found.");
         }
-        return ResponseEntity.badRequest().build();
     }
+
 
     public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId){return userClient.getFriends(userId);}
 
+    @Override
+    public void registerObserver(Observer o) {
+        if (!observers.contains(o)) {
+            observers.add(o); // Add observer to the list
+        }
+    }
 
-    //  ME7TAGEEN KAMAN NE3MEL FUNCTION FEL SERVICE ESMAHA ADD FRIEND
+    @Override
+    public void removeObserver(Observer o) {
+        observers.remove(o); // Remove observer from the list
+    }
+
+
+    @Override
+    public void notifyObservers(UUID receiverId, String message) {
+        // Notify all observers
+        for (Observer observer : observers) {
+            observer.update(receiverId, message);
+        }
+
+    }
 
 }
