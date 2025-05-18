@@ -95,8 +95,8 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public Chat unpinChat(String chatId) {
-        Chat chat = chatRepository.findById(chatId)
+    public Chat unpinChat(UUID chatId) {
+        Chat chat = chatRepository.findById(String.valueOf(chatId))
                 .orElseThrow(() -> new ResourceNotFoundException("Chat not found"));
 
         if (!chat.isPinned()) {

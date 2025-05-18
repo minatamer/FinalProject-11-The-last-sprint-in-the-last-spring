@@ -40,16 +40,12 @@ public class MessageService {
         return messageRepository.findAll();
     }
 
-    public Message sendMessage(UUID chatId, UUID senderId, String receiverId, String content, String messageType) {
+    public Message sendMessage(UUID chatId, UUID senderId, String content, String messageType) {
         Chat chat = chatRepository.findById(String.valueOf(chatId))
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
 
         if(!Boolean.TRUE.equals(userClient.userExists(senderId).getBody())){
             throw new IllegalArgumentException("User with id " + senderId + " does not exist.");
-        }
-
-        if(!Boolean.TRUE.equals(userClient.userExists(UUID.fromString(receiverId)).getBody())){
-            throw new IllegalArgumentException("User with id " + receiverId + " does not exist.");
         }
 
         if (!chat.getParticipantIds().contains(senderId)) {
@@ -100,8 +96,8 @@ public class MessageService {
         });
     }
 
-    public Message updateMessageStatus(String messageId, MessageStatus status) {
-        Message message = messageRepository.findById(messageId)
+    public Message updateMessageStatus(UUID messageId, MessageStatus status) {
+        Message message = messageRepository.findById(String.valueOf(messageId))
                 .orElseThrow(() -> new RuntimeException("Message not found"));
         message.setStatus(status);
         Message updatedMessage = messageRepository.save(message);
@@ -110,18 +106,11 @@ public class MessageService {
     }
 
     @RabbitListener(queues = RabbitMQConfig.MESSAGE_QUEUE)
-    public void notifyUser(String senderId, String receiverId, String messageId) {
-        if(!Boolean.TRUE.equals(userClient.userExists(UUID.fromString(senderId)).getBody())){
-            throw new IllegalArgumentException("User with id " + senderId + " does not exist.");
-        }
-
-        if(!Boolean.TRUE.equals(userClient.userExists(UUID.fromString(receiverId)).getBody())){
-            throw new IllegalArgumentException("User with id " + receiverId + " does not exist.");
-        }
-
-        Message message = messageRepository.findById(messageId)
+    public void notifyUser(UUID messageId) {
+        Message message = messageRepository.findById(String.valueOf(messageId))
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
-        System.out.println("Received message with id: " + messageId + " from userId: " + senderId + " to userId: " + receiverId);
+
+        System.out.println("Received message with id: " + messageId + " from userId: " + message.getSenderId() + " to list of users: ");
     }
 }
