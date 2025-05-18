@@ -9,6 +9,10 @@ import java.util.UUID;
 @FeignClient(name = "user-service", url = "http://localhost:8080/user")
 public interface UserClient {
 
-    @GetMapping("check/{userId}")
+    @GetMapping("/check/{userId}")
     ResponseEntity<Boolean> userExists(@PathVariable("userId")UUID userId);
+
+    //  AUTHENTICATION
+    @GetMapping("/validate-token/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token);
 }
