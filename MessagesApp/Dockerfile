@@ -1,5 +1,5 @@
 FROM openjdk:25-ea-4-jdk-oraclelinux9
 WORKDIR /app
-COPY target/messagesapp.jar .
-EXPOSE 8080
+COPY ./ /app
+EXPOSE 8083
 CMD ["java","-jar","/app/target/messagesapp.jar"]

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageFactory {
     public Message createMessage(String messageType) {
-        return switch (messageType) {
+        return switch (messageType.toUpperCase()) {
             case "TEXT" -> new TextMessage();
             case "IMAGE" -> new ImageMessage();
             case "VIDEO" -> new VideoMessage();

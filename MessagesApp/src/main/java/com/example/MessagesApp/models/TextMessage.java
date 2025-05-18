@@ -12,12 +12,12 @@ public class TextMessage extends Message {
     }
 
     public TextMessage(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String textContent) {
-        super(id, chatId, senderId, timestamp, status);
+        super(id, chatId, senderId, timestamp, status, textContent);
         this.textContent = textContent;
     }
 
     public TextMessage(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String textContent) {
-        super(chatId, senderId, timestamp, status);
+        super(chatId, senderId, timestamp, status, textContent);
         this.textContent = textContent;
     }
 

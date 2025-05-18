@@ -25,14 +25,14 @@ public class VideoMessage extends Message {
     }
 
     public VideoMessage(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String videoUrl, long duration, long size) {
-        super(id, chatId, senderId, timestamp, status);
+        super(id, chatId, senderId, timestamp, status, videoUrl);
         this.videoUrl = videoUrl;
         this.duration = duration;
         this.size = size;
     }
 
     public VideoMessage(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String videoUrl, long duration, long size) {
-        super(chatId, senderId, timestamp, status);
+        super(chatId, senderId, timestamp, status, videoUrl);
         this.videoUrl = videoUrl;
         this.duration = duration;
         this.size = size;

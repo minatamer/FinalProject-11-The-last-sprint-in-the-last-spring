@@ -22,6 +22,7 @@ public class Chat {
     private List<Message> messages;
 
     public Chat() {
+        this.id = UUID.randomUUID();
     }
 
     public Chat(UUID id, String name, List<UUID> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
@@ -36,6 +37,7 @@ public class Chat {
     }
 
     public Chat(String name, List<UUID> participantIds, LocalDateTime createdAt, LocalDateTime updatedAt, List<Message> messages, boolean pinned, boolean groupChat) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.participantIds = participantIds;
         this.createdAt = createdAt;

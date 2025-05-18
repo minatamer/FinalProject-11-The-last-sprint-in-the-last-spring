@@ -262,7 +262,6 @@ public class UserService {
         return  ResponseEntity.ok().body(body);
     }
 
-
     public List<UUID> getFriends(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userId));

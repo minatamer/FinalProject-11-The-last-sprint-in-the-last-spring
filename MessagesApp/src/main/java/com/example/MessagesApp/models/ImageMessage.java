@@ -14,13 +14,13 @@ public class ImageMessage extends Message {
     }
 
     public ImageMessage(UUID id, UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
-        super(id, chatId, senderId, timestamp, status);
+        super(id, chatId, senderId, timestamp, status, imageUrl);
         this.caption = caption;
         this.imageUrl = imageUrl;
     }
 
     public ImageMessage(UUID chatId, UUID senderId, LocalDateTime timestamp, MessageStatus status, String imageUrl, String caption) {
-        super(chatId, senderId, timestamp, status);
+        super(chatId, senderId, timestamp, status, imageUrl);
         this.caption = caption;
         this.imageUrl = imageUrl;
     }

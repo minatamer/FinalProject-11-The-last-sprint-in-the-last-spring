@@ -7,9 +7,153 @@
           <list>
             <requestState>
               <option name="id" value="0cedb24f-538a-493b-948c-3936d629141c" />
+              <option name="method" value="POST" />
+              <option name="name" value="/messages/populateRandomMessages" />
+              <option name="url" value="http://localhost:8083/messages/populateRandomMessages" />
+            </requestState>
+            <requestState>
+              <option name="id" value="6ae0cb75-e12a-4ddd-a5b3-544d64e93186" />
+              <option name="method" value="POST" />
+              <option name="name" value="/messages/populateRandomChats" />
+              <option name="url" value="http://localhost:8080/messages/populateRandomChats" />
+            </requestState>
+            <requestState>
+              <option name="id" value="7ac7db45-1644-4961-83e0-4508be9c5f64" />
+              <option name="method" value="POST" />
+              <option name="name" value="/messages/createDummyData" />
+              <option name="url" value="http://localhost:8080/messages/createDummyData" />
+            </requestState>
+            <requestState>
+              <option name="id" value="bda88863-66b6-41c4-8615-252c49f9d21f" />
               <option name="method" value="GET" />
-              <option name="name" value="Draft" />
-              <option name="url" value="http://localhost:8080/messages" />
+              <option name="name" value="/messages/getAllChats" />
+              <option name="url" value="http://localhost:8080/messages/getAllChats" />
+            </requestState>
+            <requestState>
+              <option name="id" value="1c0346f9-6f02-4ca1-a8eb-27922e1487f1" />
+              <option name="method" value="GET" />
+              <option name="name" value="/messages/getAllMessages" />
+              <option name="url" value="http://localhost:8080/messages/getAllMessages" />
+            </requestState>
+            <requestState>
+              <option name="body">
+                <bodyState>
+                  <option name="raw" value="{&#10;  &quot;name&quot;: &quot;chat6&quot;,&#10;  &quot;participantIds&quot;: [&#10;    &quot;11111111-1111-1111-1111-111111111111&quot;,&#10;    &quot;33333333-3333-3333-3333-333333333333&quot;&#10;  ]&#10;}" />
+                  <option name="type" value="JSON" />
+                </bodyState>
+              </option>
+              <option name="id" value="daa61a0f-c405-4328-a5f9-b8913734a35f" />
+              <option name="method" value="POST" />
+              <option name="name" value="/messages/chat/createChat" />
+              <option name="url" value="http://localhost:8080/messages/chat/createChat" />
+            </requestState>
+            <requestState>
+              <option name="body">
+                <bodyState>
+                  <option name="raw" value="{&#10;  &quot;name&quot;: &quot;chat4&quot;,&#10;  &quot;participantIds&quot;: [&#10;    &quot;11111111-1111-1111-1111-111111111111&quot;,&#10;    &quot;33333333-3333-3333-3333-333333333333&quot;&#10;  ]&#10;}" />
+                  <option name="type" value="JSON" />
+                </bodyState>
+              </option>
+              <option name="id" value="9fca09c4-ce13-4f37-a4ef-3570b20aee4d" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/chat/addUser/{chatId}/{userId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/addUser/1d6bc09f-9b9e-4b17-a0f6-26a58263ced3/33333333-3333-3333-3333-333333333333" />
+            </requestState>
+            <requestState>
+              <option name="body">
+                <bodyState>
+                  <option name="raw" value="{&#10;  &quot;name&quot;: &quot;chat4&quot;,&#10;  &quot;participantIds&quot;: [&#10;    &quot;11111111-1111-1111-1111-111111111111&quot;,&#10;    &quot;33333333-3333-3333-3333-333333333333&quot;&#10;  ]&#10;}" />
+                  <option name="type" value="JSON" />
+                </bodyState>
+              </option>
+              <option name="id" value="21be9dd9-ba62-4ba3-a430-0cf13edb9986" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/chat/removeParticipant/{chatId}/{userId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/removeParticipant/1d6bc09f-9b9e-4b17-a0f6-26a58263ced3/33333333-3333-3333-3333-333333333333" />
+            </requestState>
+            <requestState>
+              <option name="id" value="5d7c559e-64aa-4504-b026-1f78c87e7792" />
+              <option name="method" value="GET" />
+              <option name="name" value="/messages/chat/user/{userId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/user/33333333-3333-3333-3333-333333333333" />
+            </requestState>
+            <requestState>
+              <option name="body">
+                <bodyState>
+                  <option name="raw" value="{&#10;  &quot;content&quot;: &quot;Hi, I'm graduating!&quot;&#10;}&#10;" />
+                  <option name="type" value="JSON" />
+                </bodyState>
+              </option>
+              <option name="id" value="406c7825-d9cd-4101-a86a-3955ca4dbc30" />
+              <option name="method" value="POST" />
+              <option name="name" value="/messages/send/{chatId}/{senderI}/{type}" />
+              <option name="url" value="http://localhost:8080/messages/send/77777777-7777-7777-7777-777777777777/1-2222-2222-2222-222222222222/image" />
+            </requestState>
+            <requestState>
+              <option name="id" value="959a94d1-4505-4a36-84ba-37456e5ed7b2" />
+              <option name="method" value="GET" />
+              <option name="name" value="/messages/chat/openChat/{chatId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/openChat/77777777-7777-7777-7777-777777777777" />
+            </requestState>
+            <requestState>
+              <option name="id" value="260cf566-c49f-4359-8e2d-e1b0150ccd4c" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/seeChat/{chatId}/{userId}" />
+              <option name="url" value="http://localhost:8080/messages/seeChat/77777777-7777-7777-7777-777777777777/22222222-2222-2222-2222-222222222222" />
+            </requestState>
+            <requestState>
+              <option name="id" value="5a3fe520-06db-451a-9fac-67cb770be12d" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/chat/pin/{chatId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/pin/88888888-8888-8888-8888-888888888888" />
+            </requestState>
+            <requestState>
+              <option name="id" value="ad51b08a-b46f-4515-80b2-bfd870376f5b" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/chat/unpin/{chatId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/unpin/88888888-8888-8888-8888-888888888888" />
+            </requestState>
+            <requestState>
+              <option name="id" value="c0e9dcd5-ba34-4ca5-90ce-5c85c1aa03a2" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/changeStatus/{messageId}/{status}" />
+              <option name="url" value="http://localhost:8080/messages/changeStatus/00edb685-8abd-4821-a521-11a02e34e01a/SEEN" />
+            </requestState>
+            <requestState>
+              <option name="id" value="a447afed-6413-468a-bc86-a92d2f364947" />
+              <option name="method" value="DELETE" />
+              <option name="name" value="/messages/deleteChat/{chatId}" />
+              <option name="url" value="http://localhost:8080/messages/deleteChat/9c5941cd-d24c-4366-946e-b2fd489bc62d" />
+            </requestState>
+            <requestState>
+              <option name="id" value="94330959-c4ce-4e27-94ce-9b332b80f48a" />
+              <option name="method" value="DELETE" />
+              <option name="name" value="/messages/deleteMessage/{messageId}" />
+              <option name="url" value="http://localhost:8080/messages/deleteMessage/00edb685-8abd-4821-a521-11a02e34e01a" />
+            </requestState>
+            <requestState>
+              <option name="body">
+                <bodyState>
+                  <option name="raw" value="{&#10;  &quot;newName&quot;: &quot;fatakat&quot;&#10;}" />
+                  <option name="type" value="JSON" />
+                </bodyState>
+              </option>
+              <option name="id" value="2e1a8abf-5a69-491c-a14a-a86774e24605" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/chat/updateName/{chatId}" />
+              <option name="url" value="http://localhost:8080/messages/chat/updateName/88888888-8888-8888-8888-888888888888" />
+            </requestState>
+            <requestState>
+              <option name="body">
+                <bodyState>
+                  <option name="raw" value="{&#10;  &quot;newContent&quot;: &quot;Last Submission!!!!&quot;&#10;}" />
+                  <option name="type" value="JSON" />
+                </bodyState>
+              </option>
+              <option name="id" value="1c75abc9-28b5-49fc-9876-4618fe66922e" />
+              <option name="method" value="PUT" />
+              <option name="name" value="/messages/editMessage/{messageId}" />
+              <option name="url" value="http://localhost:8080/messages/editMessage/bed8509f-26ea-4ad4-89d6-a5d998b56087" />
             </requestState>
           </list>
         </option>
