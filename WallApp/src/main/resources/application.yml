@@ -23,4 +23,8 @@ spring:
             password: example
 
 server:
-    port: 8085
+    port: 8082
+
+user:
+    service:
+        url: http://localhost:8080/user

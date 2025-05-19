@@ -14,13 +14,19 @@ spec:
     spec:
       containers:
         - name: rabbitmq
-          image: rabbitmq:4.0-management
+          image: rabbitmq:4-management
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 5672
-            - containerPort: 15672
+            - containerPort: 5672  # AMQP port
+            - containerPort: 15672 # Management UI port
           env:
             - name: RABBITMQ_DEFAULT_USER
-              value: guest
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_USER
             - name: RABBITMQ_DEFAULT_PASS
-              value: guest
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_PASS

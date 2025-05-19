@@ -1,32 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: userapp-deployment
+  name: userapp-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: userapp
+      app: userapp-service
   template:
     metadata:
       labels:
-        app: userapp
+        app: userapp-service
     spec:
       containers:
-        - name: userapp
+        - name: userapp-service
           image: minatamer/userapp:1.0
           ports:
             - containerPort: 8080
           env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/facebook-replica
-            - name: SPRING_DATASOURCE_USERNAME
-              value: postgres
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: "1234"
             - name: SPRING_CACHE_TYPE
               value: redis
             - name: SPRING_DATA_REDIS_HOST
-              value: redis-service
+              value: redis
             - name: SPRING_DATA_REDIS_PORT
               value: "6379"
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-0.postgres:5432/facebook-replica
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: SPRING_APPLICATION_NAME
+              value: userapp-service
+            - name: SERVER_PORT
+              value: "8081"
+

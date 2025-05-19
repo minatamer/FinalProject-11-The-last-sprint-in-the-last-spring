@@ -4,9 +4,8 @@ metadata:
   name: userapp-service
 spec:
   selector:
-    app: userapp
+    app: userapp-service
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: NodePort
+    - port: 8080
+      targetPort: 8081
+  type: ClusterIP

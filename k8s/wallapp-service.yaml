@@ -4,9 +4,8 @@ metadata:
   name: wallapp-service
 spec:
   selector:
-    app: wallapp
+    app: wallapp-service
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8085
-  type: NodePort
+    - port: 8080
+      targetPort: 8082
+  type: ClusterIP

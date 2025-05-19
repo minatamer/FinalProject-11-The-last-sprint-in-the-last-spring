@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 
-@FeignClient(name = "user-service", url = "http://localhost:8080/user")
+@FeignClient(name = "user-service", url = "${user.service.url}")
 public interface UserClient {
 
     @GetMapping("/")

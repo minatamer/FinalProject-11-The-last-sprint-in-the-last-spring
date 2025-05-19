@@ -4,9 +4,8 @@ metadata:
   name: searchapp-service
 spec:
   selector:
-    app: searchapp
+    app: searchapp-service
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8090
+    - port: 8080
+      targetPort: 8083
   type: ClusterIP

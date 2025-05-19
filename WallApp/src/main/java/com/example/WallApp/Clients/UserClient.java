@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "user-service", url = "http://localhost:8080/user")
+@FeignClient(name = "user-service", url = "${user.service.url}")
 public interface UserClient {
 
 //  AUTHENTICATION

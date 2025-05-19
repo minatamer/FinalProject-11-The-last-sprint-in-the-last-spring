@@ -1,22 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: searchapp-deployment
+  name: searchapp-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: searchapp
+      app: searchapp-service
   template:
     metadata:
       labels:
-        app: searchapp
+        app: searchapp-service
     spec:
       containers:
-        - name: searchapp
+        - name: searchapp-service
           image: minatamer/searchapp:1.0
           ports:
-            - containerPort: 8090
+            - containerPort: 8080
           env:
             - name: SPRING_DATA_MONGODB_URI
-              value: "mongodb://root:example@mongodb-service:27017/post?authSource=admin"
+              value: "mongodb://root:example@mongo-0.mongo:27017/post?authSource=admin"
+            - name: user.service.url
+              value: http://userapp-service:8080/user
+            - name: wall.service.url
+              value: http://wallapp-service:8080/wallApp/posts
+            - name: SPRING_APPLICATION_NAME
+              value: searchapp-service
+            - name: SERVER_PORT
+              value: "8083"
+            - name: SPRING_DATA_MONGODB_HOST
+              value: "mongo-0.mongo"

@@ -4,9 +4,8 @@ metadata:
   name: messagesapp-service
 spec:
   selector:
-    app: messagesapp
+    app: messagesapp-service
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: NodePort
+    - port: 8080
+      targetPort: 8084
+  type: ClusterIP
