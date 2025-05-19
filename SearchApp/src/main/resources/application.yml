@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://root:example@localhost:27017/post?authSource=admin
+      uri: mongodb://root:example@localhost:27017/search?authSource=admin
 
     mongo-express:
       image: mongo-express
@@ -14,12 +14,6 @@ spring:
         - ME_CONFIG_MONGODB_SERVER=mongo
       depends_on:
         - mongo
-
-    rabbitmq:
-      host: rabbitmq
-      port: 5672
-      username: root
-      password: example
 
 server:
   port: 8083

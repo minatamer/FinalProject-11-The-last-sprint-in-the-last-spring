@@ -1,6 +1,7 @@
 package com.example.SearchApp.controllers;
 
 import com.example.SearchApp.model.PostDTO;
+import com.example.SearchApp.model.Search;
 import com.example.SearchApp.model.UserDTO;
 import com.example.SearchApp.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,11 @@ public class Controller
     @Autowired
     public Controller(SearchService searchService) {
         this.searchService = searchService;
+    }
+
+    @GetMapping("/all")
+    public List<Search> getAllSearches() {
+        return searchService.getAllSearches();
     }
 
     //-----------------------------------------------Posts-----------------------------------------------------//

@@ -19,7 +19,7 @@ spec:
             - containerPort: 8080
           env:
             - name: SPRING_DATA_MONGODB_URI
-              value: "mongodb://root:example@mongo-0.mongo:27017/post?authSource=admin"
+              value: "mongodb://root:example@mongo-0.mongo:27017/search?authSource=admin"
             - name: user.service.url
               value: http://userapp-service:8080/user
             - name: wall.service.url
