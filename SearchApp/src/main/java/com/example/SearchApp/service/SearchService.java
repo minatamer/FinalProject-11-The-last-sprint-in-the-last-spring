@@ -5,9 +5,11 @@ import com.example.SearchApp.Clients.WallClient;
 import com.example.SearchApp.Command.*;
 import com.example.SearchApp.Strategy.SearchStrategy;
 import com.example.SearchApp.model.PostDTO;
+import com.example.SearchApp.model.Search;
 import com.example.SearchApp.model.UserDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.example.SearchApp.repositories.SearchRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,6 +29,9 @@ public class SearchService {
     FilterInvoker<UserDTO> userFilterInvoker;
 
     @Autowired
+    SearchRepository searchRepository;
+
+    @Autowired
     public SearchService(UserClient userClient, WallClient wallClient, Map<String, SearchStrategy<?>> strategyMap, FilterInvoker<PostDTO> postsFilterInvoker, FilterInvoker<UserDTO> userFilterInvoker) {
         this.userClient = userClient;
         this.wallClient = wallClient;
@@ -35,10 +40,15 @@ public class SearchService {
         this.userFilterInvoker = userFilterInvoker;
     }
 
+    public List<Search> getAllSearches() {
+        return searchRepository.findAll();
+    }
+
 
     //-----------------------------------------------Posts-----------------------------------------------------//
     public List<PostDTO> searchPosts(String searchQuery)
     {
+        searchRepository.save(new Search(searchQuery));
         postsFilterInvoker.setCommandHistory( new ArrayList<>());
         List<PostDTO> posts = wallClient.getAllPosts();
         @SuppressWarnings("unchecked")
@@ -147,6 +157,7 @@ public class SearchService {
 
     public List<UserDTO> searchUsers(String searchQuery , String token)
     {
+        searchRepository.save(new Search(searchQuery));
         userFilterInvoker.setCommandHistory( new ArrayList<>());
         List<UserDTO> users = userClient.getUsers(token);
         @SuppressWarnings("unchecked")
