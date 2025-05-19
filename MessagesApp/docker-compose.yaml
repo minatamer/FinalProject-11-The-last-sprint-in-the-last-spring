@@ -20,18 +20,18 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
 
-  messaging-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8083:8080"
-    environment:
-      SPRING_DATA_MONGODB_HOST: mongo
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/facebook_messaging?authSource=admin
-      SPRING_DATA_MONGODB_DATABASE: facebook_messaging
-    depends_on:
-      - mongo
-      - rabbitmq
-    restart: always
+#  messaging-app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8083:8080"
+#    environment:
+#      SPRING_DATA_MONGODB_HOST: mongo
+#      SPRING_RABBITMQ_HOST: rabbitmq
+#      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/facebook_messaging?authSource=admin
+#      SPRING_DATA_MONGODB_DATABASE: facebook_messaging
+#    depends_on:
+#      - mongo
+#      - rabbitmq
+#    restart: always

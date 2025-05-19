@@ -52,9 +52,9 @@ public class Controller
     //-----------------------------------------------Users-----------------------------------------------------//
 
     @PostMapping("/user/search")
-    public List<UserDTO> searchUsers(@RequestParam String searchQuery)
+    public List<UserDTO> searchUsers(@RequestParam String searchQuery , @RequestHeader("Authorization") String token)
     {
-        return searchService.searchUsers(searchQuery);
+        return searchService.searchUsers(searchQuery , token);
     }
 
     @PostMapping("/user/filter")

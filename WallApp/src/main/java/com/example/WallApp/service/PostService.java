@@ -89,9 +89,9 @@ public class PostService implements Subject {
         return postRepository.findById(id);
     }
 
-    public List<Post> getMyPosts(UUID userId) {
+    public List<Post> getMyPosts(UUID userId , String token) {
         // 1. Get the user's friends
-        ResponseEntity<List<UUID>> friendsResponse = userClient.getFriends(userId);
+        ResponseEntity<List<UUID>> friendsResponse = userClient.getFriends(userId , token);
 
         if (friendsResponse.getStatusCode().is2xxSuccessful() && friendsResponse.getBody() != null) {
             List<UUID> friends = friendsResponse.getBody();
@@ -165,18 +165,18 @@ public class PostService implements Subject {
     //ME7TAGEEN NE LINK BEL USER MESH EL POST
 
 
-    public ResponseEntity<?> addFriend(UUID userId, UUID friendId) {
+    public ResponseEntity<?> addFriend(UUID userId, UUID friendId , String token) {
         // Register the friend as an observer
         registerObserver(notificationService);
 
-        return userClient.addFriend(userId, friendId);
+        return userClient.addFriend(userId, friendId , token);
     }
 
-    public ResponseEntity<?> removeFriend(UUID userId, UUID friendId) {
+    public ResponseEntity<?> removeFriend(UUID userId, UUID friendId , String token) {
         // Unregister the friend as an observer
         removeObserver(notificationService);
 
-        return userClient.removeFriend(userId, friendId);
+        return userClient.removeFriend(userId, friendId , token);
     }
 
     public ResponseEntity<?> sharePost(UUID userId, UUID postId) {
@@ -205,7 +205,7 @@ public class PostService implements Subject {
     }
 
 
-    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId){return userClient.getFriends(userId);}
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable UUID userId , String token){return userClient.getFriends(userId , token);}
 
     @Override
     public void registerObserver(Observer o) {

@@ -145,10 +145,10 @@ public class SearchService {
 
     //-----------------------------------------------Users-----------------------------------------------------//
 
-    public List<UserDTO> searchUsers(String searchQuery)
+    public List<UserDTO> searchUsers(String searchQuery , String token)
     {
         userFilterInvoker.setCommandHistory( new ArrayList<>());
-        List<UserDTO> users = userClient.getUsers("");
+        List<UserDTO> users = userClient.getUsers(token);
         @SuppressWarnings("unchecked")
         SearchStrategy<UserDTO> userStrategy = (SearchStrategy<UserDTO>) strategyMap.get("userSearchStrategy");
         return userStrategy.search(users,searchQuery);

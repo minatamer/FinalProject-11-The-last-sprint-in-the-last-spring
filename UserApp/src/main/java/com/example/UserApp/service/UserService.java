@@ -265,6 +265,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Friend not found: " + friendId));
 
         friendRepository.deleteByUserAndFriend(user, friend);
+        friendRepository.deleteByUserAndFriend(friend, user);
         Map<String,String> body = Map.of(
                 "message",friendId+" has been removed from the followed users of "+ userId
         );

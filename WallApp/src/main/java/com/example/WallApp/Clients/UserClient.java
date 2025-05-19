@@ -18,16 +18,16 @@ public interface UserClient {
 //  FRIENDS
 
     @GetMapping("{userId}/friends")
-    public ResponseEntity<List<UUID>> getFriends(@PathVariable("userId") UUID userId);
+    public ResponseEntity<List<UUID>> getFriends(@PathVariable("userId") UUID userId, @RequestHeader("Authorization") String token);
 
     @PostMapping("{userId}/friend/{friendId}")
-    public ResponseEntity<String> addFriend(@PathVariable("userId") UUID userId, @PathVariable("friendId") UUID friendId);
+    public ResponseEntity<String> addFriend(@PathVariable("userId") UUID userId, @PathVariable("friendId") UUID friendId, @RequestHeader("Authorization") String token);
 
     @DeleteMapping("{userId}/unfriend/{friendId}")
-    public ResponseEntity<String> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId);
+    public ResponseEntity<String> removeFriend(@PathVariable UUID userId, @PathVariable UUID friendId, @RequestHeader("Authorization") String token);
 
     @GetMapping("check/{userId}")
-    ResponseEntity<Boolean> checkUser(@PathVariable("userId")UUID userId);
+    ResponseEntity<Boolean> checkUser(@PathVariable("userId") UUID userId, @RequestHeader("Authorization") String token);
 
     @GetMapping("/{userId}/token")
     public ResponseEntity<Map<String, String>> getUserToken(@PathVariable UUID userId);
