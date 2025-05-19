@@ -5,11 +5,13 @@ import com.example.SearchApp.model.Search;
 import com.example.SearchApp.model.UserDTO;
 import com.example.SearchApp.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/search")
@@ -27,11 +29,17 @@ public class Controller
         return searchService.getAllSearches();
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Search>> getSearchesByUserId(@PathVariable UUID userId) {
+        List<Search> searches = searchService.getSearchesByUserId(userId);
+        return ResponseEntity.ok(searches);
+    }
+
     //-----------------------------------------------Posts-----------------------------------------------------//
     @PostMapping("/post/search")
-    public List<PostDTO> searchPosts(@RequestParam String searchQuery)
+    public List<PostDTO> searchPosts(@RequestParam String searchQuery,  @RequestHeader("Authorization") String token)
     {
-        return searchService.searchPosts(searchQuery);
+        return searchService.searchPosts(searchQuery , token);
     }
 
     @PostMapping("/post/filter")

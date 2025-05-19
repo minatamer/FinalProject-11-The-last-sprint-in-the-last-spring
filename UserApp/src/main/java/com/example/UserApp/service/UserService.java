@@ -282,6 +282,11 @@ public class UserService {
                 .toList();
 }
 
+    public UUID getUserIdByToken(String token) {
+        return userRepository.findByToken(token)
+                .map(User::getId)
+                .orElse(null);
+    }
 
 
 }

@@ -7,17 +7,15 @@ import com.example.SearchApp.Strategy.SearchStrategy;
 import com.example.SearchApp.model.PostDTO;
 import com.example.SearchApp.model.Search;
 import com.example.SearchApp.model.UserDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.SearchApp.repositories.SearchRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Iterator;
 
 @Service
 public class SearchService {
@@ -44,11 +42,24 @@ public class SearchService {
         return searchRepository.findAll();
     }
 
+    public List<Search> getSearchesByUserId(UUID userId) {
+        return searchRepository.findByUserId(userId);
+    }
 
     //-----------------------------------------------Posts-----------------------------------------------------//
-    public List<PostDTO> searchPosts(String searchQuery)
+    public List<PostDTO> searchPosts(String searchQuery, String token)
     {
-        searchRepository.save(new Search(searchQuery));
+        UUID userId = userClient.getUserIdByToken(token)
+                .get("userId");
+
+        if (userId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found for the specified token");
+        }
+        searchRepository.save(new Search(searchQuery, userId));
+        // --- 2. Persist search --------------------------------------------------
+
         postsFilterInvoker.setCommandHistory( new ArrayList<>());
         List<PostDTO> posts = wallClient.getAllPosts();
         @SuppressWarnings("unchecked")
@@ -157,7 +168,15 @@ public class SearchService {
 
     public List<UserDTO> searchUsers(String searchQuery , String token)
     {
-        searchRepository.save(new Search(searchQuery));
+        UUID userId = userClient.getUserIdByToken(token)
+                .get("userId");
+
+        if (userId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User not found for the specified token");
+        }
+        searchRepository.save(new Search(searchQuery, userId));
         userFilterInvoker.setCommandHistory( new ArrayList<>());
         List<UserDTO> users = userClient.getUsers(token);
         @SuppressWarnings("unchecked")
