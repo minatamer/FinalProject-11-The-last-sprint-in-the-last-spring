@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @FeignClient(name = "user-service", url = "${user.service.url}")
@@ -29,7 +30,7 @@ public interface UserClient {
     ResponseEntity<Boolean> checkUser(@PathVariable("userId")UUID userId);
 
     @GetMapping("/{userId}/token")
-    public ResponseEntity<?> getUserToken(@PathVariable UUID userId);
+    public ResponseEntity<Map<String, String>> getUserToken(@PathVariable UUID userId);
 
 
 }
