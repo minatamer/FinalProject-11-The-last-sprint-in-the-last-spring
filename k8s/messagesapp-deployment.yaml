@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messagesapp-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: messagesapp-service
+  template:
+    metadata:
+      labels:
+        app: messagesapp-service
+    spec:
+      containers:
+        - name: messagesapp-service
+          image: minatamer/messagesapp:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            # RabbitMQ
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_USER
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_PASS
+            - name: SPRING_DATA_MONGODB_HOST
+              value: mongo-0.mongo
+            - name: SPRING_DATA_MONGODB_PORT
+              value: "27017"
+            - name: SPRING_DATA_MONGODB_DATABASE
+              value: facebook_messaging
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MESSAGES_URI
+            - name: SPRING_CLOUD_COMPATIBILITY_VERIFIER_ENABLED
+              value: "false"
+            - name: user.service.url
+              value: http://userapp-service:8080/user
+            - name: SPRING_APPLICATION_NAME
+              value: messagesapp-service
+            - name: SERVER_PORT
+              value: "8084"

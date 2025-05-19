@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallapp-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wallapp-service
+  template:
+    metadata:
+      labels:
+        app: wallapp-service
+    spec:
+      containers:
+        - name: wallapp-service
+          image: minatamer/wallapp:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://root:example@mongo-0.mongo:27017/post?authSource=admin"
+            - name: SPRING_DATA_MONGODB_HOST
+              value: "mongo-0.mongo"
+            - name: user.service.url
+              value: http://userapp-service:8080/user
+            - name: SPRING_APPLICATION_NAME
+              value: wallapp-service
+            - name: SERVER_PORT
+              value: "8082"

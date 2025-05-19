@@ -22,4 +22,12 @@ spring:
       password: example
 
 server:
-  port: 8090
+  port: 8083
+
+user:
+  service:
+    url: http://localhost:8080/user
+
+wall:
+  service:
+    url: http://localhost:8085/wallApp/posts
