@@ -27,4 +27,4 @@ server:
 
 user:
     service:
-        url: http://localhost:8080/user
+        url: http://localhost:8081/user

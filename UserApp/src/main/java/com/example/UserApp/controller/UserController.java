@@ -30,7 +30,7 @@ public class UserController {
     private final DatabasePopulatorService databasePopulatorService;
 
     // Toggle this to enable/disable authentication globally
-    private final boolean authenticationEnabled = false;
+    private final boolean authenticationEnabled = true;
 
     @Autowired
     public UserController(UserService userService, UserRepository userRepository, DatabasePopulatorService databasePopulatorService) {

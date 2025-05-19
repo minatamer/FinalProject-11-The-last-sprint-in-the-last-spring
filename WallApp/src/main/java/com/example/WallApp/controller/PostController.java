@@ -95,7 +95,7 @@ public class PostController {
         }
 
         // Fetch the posts
-        List<Post> posts = postService.getMyPosts(userId);
+        List<Post> posts = postService.getMyPosts(userId , token);
 
         // Return the list of posts
         return ResponseEntity.ok(posts);
@@ -170,7 +170,7 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
         }
         //
-        return postService.addFriend(userId,friendId);
+        return postService.addFriend(userId,friendId , token);
     }
 
     @GetMapping("/{userId}/friends")
@@ -178,7 +178,7 @@ public class PostController {
         if(!isAuthenticated(token,userId)){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token.");
         }
-        return postService.getFriends(userId);
+        return postService.getFriends(userId , token);
     }
 
     @DeleteMapping("/{userId}/unfriend/{friendId}")
@@ -186,6 +186,6 @@ public class PostController {
         if (!isAuthenticated(token,userId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
         }
-        return postService.removeFriend(userId,friendId);
+        return postService.removeFriend(userId,friendId, token);
 }
 }
