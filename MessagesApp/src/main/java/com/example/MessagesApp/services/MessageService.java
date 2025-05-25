@@ -63,6 +63,7 @@ public class MessageService {
         message.setSenderId(senderId);
         message.setTimestamp(LocalDateTime.now());
         message.setStatus(MessageStatus.SENT);
+        message.setContent(content);
 
         if(message instanceof TextMessage) {
             ((TextMessage) message).setTextContent(content);
@@ -83,7 +84,8 @@ public class MessageService {
 
         // Notify observers
         messageNotifier.notifyObservers(savedMessage);
-        this.rabbitMQProducer.sendToUser(message.getId(), message.getSenderId());
+        System.out.println(message);
+        this.rabbitMQProducer.sendToUser(message.getContent(), message.getSenderId());
 
         return savedMessage;
     }
