@@ -288,5 +288,10 @@ public class UserService {
                 .orElse(null);
     }
 
+    public void processIncomingMessage(String messageContent) {
+        System.out.println("UserService received message: " + messageContent);
+        // You can add further logic here like storing, transforming, or notifying users.
+    }
+
 
 }

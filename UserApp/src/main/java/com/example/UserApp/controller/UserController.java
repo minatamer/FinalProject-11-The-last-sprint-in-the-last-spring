@@ -133,61 +133,61 @@ public class UserController {
 //    END OF METHODS NEEDED FOR WALLAPP
 
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-//        String email = credentials.get("email");
-//        String password = credentials.get("password");
-//
-//        String token = userService.authenticate(email, password);
-//        if (token != null) {
-//            return ResponseEntity.ok(Collections.singletonMap("token", token));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
-//        }
-//    }
-//
-//    @PostMapping("/otpLogin")
-//    public ResponseEntity<?> authenticateWithOtp(@RequestBody Map<String, String> credentials) {
-//        String email = credentials.get("email");
-//        String otp = credentials.get("otp");
-//
-//        String token = userService.authenticateWithOtp(email, otp);
-//        if (token != null) {
-//            return ResponseEntity.ok(Collections.singletonMap("token", token));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP.");
-//        }
-//    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
 
-        LoginContext context = new LoginContext();
-        context.setStrategy(new PasswordLoginStrategy(userRepository));
-        String token = context.executeStrategy(email, password);
-
+        String token = userService.authenticate(email, password);
         if (token != null) {
             return ResponseEntity.ok(Collections.singletonMap("token", token));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
 
     @PostMapping("/otpLogin")
-    public ResponseEntity<?> otpLogin(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<?> authenticateWithOtp(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String otp = credentials.get("otp");
 
-        LoginContext context = new LoginContext();
-        context.setStrategy(new OtpLoginStrategy(userRepository));
-        String token = context.executeStrategy(email, otp);
-
+        String token = userService.authenticateWithOtp(email, otp);
         if (token != null) {
             return ResponseEntity.ok(Collections.singletonMap("token", token));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP.");
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP");
     }
+
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+//        String email = credentials.get("email");
+//        String password = credentials.get("password");
+//
+//        LoginContext context = new LoginContext();
+//        context.setStrategy(new PasswordLoginStrategy(userRepository));
+//        String token = context.executeStrategy(email, password);
+//
+//        if (token != null) {
+//            return ResponseEntity.ok(Collections.singletonMap("token", token));
+//        }
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+//    }
+//
+//    @PostMapping("/otpLogin")
+//    public ResponseEntity<?> otpLogin(@RequestBody Map<String, String> credentials) {
+//        String email = credentials.get("email");
+//        String otp = credentials.get("otp");
+//
+//        LoginContext context = new LoginContext();
+//        context.setStrategy(new OtpLoginStrategy(userRepository));
+//        String token = context.executeStrategy(email, otp);
+//
+//        if (token != null) {
+//            return ResponseEntity.ok(Collections.singletonMap("token", token));
+//        }
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP");
+//    }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String token) {
